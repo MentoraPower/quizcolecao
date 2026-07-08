@@ -168,8 +168,9 @@
   body.has-topbar .stage{padding-top:96px}
 
   /* Diagnóstico (IA), tela "Criando diagnóstico" */
-  .diag-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;min-height:52vh;color:var(--brown-1)}
-  .diag-loading p{font-size:17px;font-weight:600;letter-spacing:.3px}
+  .diag-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;min-height:52vh;color:var(--brown-1)}
+  .diag-reassure{font-size:18px;font-weight:700;color:var(--ink);text-align:center;max-width:400px;line-height:1.4;min-height:26px;transition:opacity .3s}
+  .diag-label{font-size:14px;font-weight:600;letter-spacing:.3px;color:var(--muted)}
   .diag-bar{width:240px;max-width:70%;height:6px;border-radius:99px;background:var(--line);overflow:hidden}
   .diag-bar > i{display:block;width:40%;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brown-soft),var(--brown-1));animation:load 1.15s ease-in-out infinite}
   @keyframes load{0%{margin-left:-40%}100%{margin-left:100%}}
@@ -343,8 +344,9 @@
   <!-- ================= DIAGNÓSTICO (IA) ================= -->
   <div class="step" data-step data-diagnose>
     <div class="diag-loading" id="diagLoading">
+      <p class="diag-reassure" id="diagReassure">Analisando as suas respostas...</p>
       <div class="diag-bar"><i></i></div>
-      <p>Criando diagnóstico</p>
+      <p class="diag-label">Criando o seu diagnóstico</p>
     </div>
     <div class="diag-result" id="diagResult" hidden>
       <h2 id="diagTitle"></h2>
@@ -678,10 +680,20 @@
     const started=Date.now();
     const resp=coletaRespostas();
     const fb=montaFallback(resp);
+    // mensagens rotativas pra acalmar o lead durante a espera
+    const reassure=document.getElementById('diagReassure');
+    const MSGS=['Analisando as suas respostas...','Identificando o que trava as suas vendas...','Só mais uns segundos...','Quase lá, montando o seu diagnóstico...','Finalizando o seu diagnóstico...'];
+    let mi=0;
+    const rot=setInterval(()=>{
+      mi=(mi+1)%MSGS.length;
+      reassure.style.opacity='0';
+      setTimeout(()=>{ reassure.textContent=MSGS[mi]; reassure.style.opacity='1'; },300);
+    },2200);
     const show=(d)=>{
       // garante que a tela "Criando diagnóstico" apareça por pelo menos 1.4s
       const wait=Math.max(0,1400-(Date.now()-started));
       setTimeout(()=>{
+        clearInterval(rot);
         document.getElementById('diagTitle').textContent=d.titulo||fb.titulo;
         document.getElementById('diagText').textContent=d.texto||fb.texto;
         const ul=document.getElementById('diagPoints'); ul.innerHTML='';
@@ -690,16 +702,22 @@
       },wait);
     };
     try{
+      const ctrl=new AbortController();
+      const to=setTimeout(()=>ctrl.abort(),14000);   // nunca gira mais que 14s
       const r=await fetch(DIAG_URL,{
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPA_ANON,'apikey':SUPA_ANON},
-        body:JSON.stringify({respostas:resp})
+        body:JSON.stringify({respostas:resp}),
+        signal:ctrl.signal
       });
+      clearTimeout(to);
       if(!r.ok) throw new Error('http '+r.status);
-      show(await r.json());
+      const d=await r.json();
+      if(!d||!d.texto) throw new Error('resposta vazia');
+      show(d);
     }catch(err){
       console.warn('Diagnóstico via IA indisponível, usando fallback:',err);
-      show(fb);   // nunca trava o funil
+      show(fb);   // fallback personalizado: nunca trava nem falha
     }
   }
 

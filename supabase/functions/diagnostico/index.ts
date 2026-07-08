@@ -103,6 +103,8 @@ Deno.serve(async (req) => {
         : JSON.stringify(respostas)) +
       "\n\nGere o diagnóstico agora.";
 
+    // effort "low" acelera a geração numa tarefa simples de copy.
+    // (Fast Mode do Opus está desabilitado nesta conta, por isso não é usado.)
     const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -113,8 +115,8 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: MODEL,
         max_tokens: 1024,
+        output_config: { effort: "low", format: { type: "json_schema", schema } },
         system: SYSTEM,
-        output_config: { format: { type: "json_schema", schema } },
         messages: [{ role: "user", content: userMsg }],
       }),
     });
