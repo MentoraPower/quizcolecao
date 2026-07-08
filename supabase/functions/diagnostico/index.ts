@@ -57,10 +57,13 @@ CAMPOS DE SAÍDA:
     "Você está perdendo cliente na apresentação"
     "Seu tráfego chega, mas não vira cliente"
     "Falta pouco pra você cobrar o que merece"
-- "texto": 2 a 3 frases claras e diretas, fáceis de ler. Escreva como quem conversa: frases
-  curtas, sem enrolação, sem palavra difícil, sem metáfora confusa. Personalize às respostas
-  (área, tempo, como divulga, o que trava) nomeando a situação real dela, e termine deixando
-  claro que existe solução. Cada frase precisa fazer sentido sozinha.
+- "texto": 3 a 4 frases em português SIMPLES e CORRETO (zero erro de gramática ou concordância),
+  fáceis de entender lendo rápido. O objetivo é que ela reconheça que TEM UM PROBLEMA REAL hoje
+  que está travando as vendas dela. Cite de forma explícita o que ela respondeu (a área dela, o
+  tempo de atuação, COMO ela divulga, e O QUE ela marcou que trava) para a fala fazer TOTAL
+  sentido com a situação dela. Escreva como quem conversa: frases curtas, sem enrolação, sem
+  palavra difícil, sem metáfora confusa. Cada frase precisa fazer sentido sozinha. Termine
+  deixando claro que isso tem solução.
 - "pontos": exatamente 3 itens curtos e específicos (máx ~12 palavras cada), claros. O último
   SEMPRE conecta à Coleção Beauty como a solução.
 - "cta": chamada curta para o botão (não é usada na tela, mas preencha, ex: "Ver minha solução").`;
