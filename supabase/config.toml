@@ -1,0 +1,4 @@
+project_id = "knqfiqyvpglyfabsmmlm"
+
+[functions.diagnostico]
+verify_jwt = true
