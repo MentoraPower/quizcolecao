@@ -700,14 +700,19 @@
     }
   }
 
-  /* Captura do lead (nome, e-mail, telefone) -> tabela "leads" no Supabase */
-  async function salvaLead(dados){
+  /* Captura do lead (nome, e-mail, telefone) -> tabela "leads" no Supabase.
+     Roda em segundo plano com timeout, para NUNCA travar a navegação. */
+  function salvaLead(dados){
     try{
-      await fetch(SUPA_URL+'/rest/v1/leads',{
+      const ctrl=new AbortController();
+      const t=setTimeout(()=>ctrl.abort(),6000);
+      fetch(SUPA_URL+'/rest/v1/leads',{
         method:'POST',
         headers:{'Content-Type':'application/json','apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON,'Prefer':'return=minimal'},
-        body:JSON.stringify(dados)
-      });
+        body:JSON.stringify(dados),
+        signal:ctrl.signal,
+        keepalive:true
+      }).then(()=>clearTimeout(t)).catch(err=>console.warn('Falha ao salvar lead:',err));
     }catch(err){ console.warn('Falha ao salvar lead:',err); }
   }
   /* ===== Seletor de DDI com bandeiras SVG (flagcdn) ===== */
@@ -795,18 +800,17 @@
   document.addEventListener('click',e=>{ if(!ddiPanel.hidden && !ddiPanel.contains(e.target) && !ddiBtn.contains(e.target)) fecharDDI(); });
 
   const leadForm=document.getElementById('leadForm');
-  leadForm.addEventListener('submit',async(e)=>{
+  leadForm.addEventListener('submit',(e)=>{
     e.preventDefault();
-    const btn=leadForm.querySelector('button[type=submit]');
-    btn.disabled=true;
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); // fecha teclado / reseta zoom iOS
     const dados={
       nome:document.getElementById('leadNome').value.trim(),
       email:document.getElementById('leadEmail').value.trim(),
       telefone:ddiCode.textContent+' '+document.getElementById('leadTel').value.trim(),
       respostas:coletaRespostas()
     };
-    await salvaLead(dados);       // não trava o funil se falhar
-    next();
+    salvaLead(dados);   // segundo plano, não bloqueia
+    next();             // avança na hora
   });
 
   render();

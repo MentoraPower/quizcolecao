@@ -6,7 +6,7 @@
 //   supabase functions deploy diagnostico --project-ref knqfiqyvpglyfabsmmlm
 //   supabase secrets set ANTHROPIC_API_KEY=sk-ant-... --project-ref knqfiqyvpglyfabsmmlm
 
-const MODEL = "claude-haiku-4-5"; // rápido e barato p/ o funil; troque por "claude-opus-4-8" se quiser texto ainda mais elaborado
+const MODEL = "claude-opus-4-8"; // melhor qualidade (mais lento, sem problema pro funil)
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -48,12 +48,21 @@ REGRAS DE ESTILO:
 - Seja concreto: fale de ticket, combo, percepção de valor, cliente que some.
 
 CAMPOS DE SAÍDA:
-- "titulo": um gancho pessoal e confiante, no estilo "Eu sei exatamente o seu problema" ou uma
-  variação personalizada à situação dela. Máx 9 palavras. Sem ponto final.
-- "texto": 3 a 4 frases MUITO personalizadas às respostas, descrevendo o problema real dela e
-  por que isso está travando as vendas. Termine deixando claro que a solução existe.
-- "pontos": exatamente 3 itens curtos e específicos (máx ~12 palavras cada). O último SEMPRE
-  conecta à Coleção Beauty como a solução.
+- "titulo": UMA frase curta, clara e de fácil leitura, que resume o problema dela de um jeito
+  que ela pensa "é isso mesmo". Português natural, sem trocadilho, sem duplo sentido, sem cortar
+  no meio. Tem que fazer sentido sozinha, lida rápido. Máx 8 palavras. Sem ponto final.
+  Exemplos do TOM (não copie, personalize à resposta dela):
+    "Você tem talento, mas seus materiais não vendem"
+    "Seu trabalho vale mais do que você cobra"
+    "Você está perdendo cliente na apresentação"
+    "Seu tráfego chega, mas não vira cliente"
+    "Falta pouco pra você cobrar o que merece"
+- "texto": 2 a 3 frases claras e diretas, fáceis de ler. Escreva como quem conversa: frases
+  curtas, sem enrolação, sem palavra difícil, sem metáfora confusa. Personalize às respostas
+  (área, tempo, como divulga, o que trava) nomeando a situação real dela, e termine deixando
+  claro que existe solução. Cada frase precisa fazer sentido sozinha.
+- "pontos": exatamente 3 itens curtos e específicos (máx ~12 palavras cada), claros. O último
+  SEMPRE conecta à Coleção Beauty como a solução.
 - "cta": chamada curta para o botão (não é usada na tela, mas preencha, ex: "Ver minha solução").`;
 
 const schema = {
