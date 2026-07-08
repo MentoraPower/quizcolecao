@@ -176,8 +176,11 @@
 
   /* Resultado do diagnóstico, limpo, espaçado, legível */
   .diag-result{animation:slide .5s cubic-bezier(.2,.7,.2,1);max-width:600px;margin:0 auto;padding:6px 2px 0}
-  .diag-result h2{text-align:center;font-size:28px;line-height:1.32;letter-spacing:-.4px;margin-bottom:22px}
-  .diag-text{font-size:18px;line-height:1.75;color:#4c4139;text-align:center;max-width:540px;margin:0 auto 32px}
+  .diag-result h2{text-align:center;font-size:29px;line-height:1.28;letter-spacing:-.4px;margin:0 auto 22px;max-width:600px;
+    text-wrap:balance;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .diag-text{font-size:18px;line-height:1.75;color:#4c4139;text-align:center;max-width:540px;margin:0 auto 30px}
+  /* Aviso: temos a solução, é só preencher */
+  .diag-solve{max-width:540px;margin:26px auto 0;text-align:center;font-size:17px;line-height:1.55;color:var(--brown-1);font-weight:700}
   .diag-points{list-style:none;margin:0 auto}
   .diag-points li{display:flex;align-items:center;gap:14px;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px;font-size:16px;line-height:1.5;color:var(--ink)}
   .diag-points li::before{content:"";flex:none;width:22px;height:22px;border-radius:50%;background:var(--brown-1);
@@ -264,8 +267,9 @@
     .access-grid{grid-template-columns:1fr;gap:26px}
     .access-img{aspect-ratio:16/11}
     /* Diagnóstico no mobile */
-    .diag-result h2{font-size:23px}
+    .diag-result h2{font-size:26px;line-height:1.25}
     .diag-text{font-size:16.5px;line-height:1.7}
+    .diag-solve{font-size:16px}
     .diag-points li{font-size:15px;padding:14px 16px}
     .lead-form{padding:22px 18px;border-radius:18px}
     .buy-card{padding:28px 20px 26px;border-radius:18px}
@@ -346,6 +350,7 @@
       <h2 id="diagTitle"></h2>
       <p class="diag-text" id="diagText"></p>
       <ul class="diag-points" id="diagPoints"></ul>
+      <p class="diag-solve">Boa notícia: eu já tenho a solução certa pra resolver isso. É só preencher abaixo para receber.</p>
       <form class="lead-form" id="leadForm">
         <p class="lead-cta">Preencha abaixo para receber o seu diagnóstico completo e os materiais</p>
         <input type="text" id="leadNome" placeholder="Seu nome" autocomplete="name" required>
@@ -671,8 +676,8 @@
     const resp=coletaRespostas();
     const fb=montaFallback(resp);
     const show=(d)=>{
-      // garante que a tela "Criando diagnóstico" apareça por pelo menos 2s
-      const wait=Math.max(0,2000-(Date.now()-started));
+      // garante que a tela "Criando diagnóstico" apareça por pelo menos 1.4s
+      const wait=Math.max(0,1400-(Date.now()-started));
       setTimeout(()=>{
         document.getElementById('diagTitle').textContent=d.titulo||fb.titulo;
         document.getElementById('diagText').textContent=d.texto||fb.texto;

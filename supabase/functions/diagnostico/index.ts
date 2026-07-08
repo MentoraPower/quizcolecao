@@ -6,7 +6,7 @@
 //   supabase functions deploy diagnostico --project-ref knqfiqyvpglyfabsmmlm
 //   supabase secrets set ANTHROPIC_API_KEY=sk-ant-... --project-ref knqfiqyvpglyfabsmmlm
 
-const MODEL = "claude-opus-4-8"; // troque por "claude-haiku-4-5" p/ respostas mais rápidas e baratas
+const MODEL = "claude-haiku-4-5"; // rápido e barato p/ o funil; troque por "claude-opus-4-8" se quiser texto ainda mais elaborado
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
