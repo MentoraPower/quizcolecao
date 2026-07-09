@@ -552,6 +552,7 @@ const bar=document.getElementById('bar');
 const backBtn=document.getElementById('backBtn');
 const topbar=document.getElementById('topbar');
 const answers={}; // id -> {label, pts, value?, labels?}
+const reached=new Set(); // etapas já marcadas como "chegou" (1x por visita)
 let i=0;
 
 /* ===================== GERA AS PERGUNTAS ===================== */
@@ -756,6 +757,8 @@ function render(){
   const el=steps[i];
   const isQ=el.hasAttribute('data-q');
   const isOffer=el.hasAttribute('data-offer');
+  // marca "chegou na etapa" no instante em que a pergunta aparece (1x por visita)
+  if(isQ){ const qid=el.getAttribute('data-q'); if(!reached.has(qid)){ reached.add(qid); track('quiz_step',{step:qid}); } }
   // progresso
   bar.style.width=(isQ ? CFG[el.getAttribute('data-q')].n/TOTAL_Q*100 : (el.hasAttribute('data-open')?0:100))+'%';
   wrapEl.classList.toggle('wide', el.classList.contains('wide'));

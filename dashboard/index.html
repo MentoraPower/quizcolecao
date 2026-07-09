@@ -35,6 +35,9 @@
   .tab{border:0;background:none;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);padding:9px 18px;border-radius:999px;transition:.15s}
   .tab:hover{color:var(--brown-1)}
   .tab.active{background:var(--brown-1);color:#fff}
+  .live{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:#3f9e46;letter-spacing:.3px}
+  .live i{width:9px;height:9px;border-radius:50%;background:#3f9e46;box-shadow:0 0 0 0 rgba(63,158,70,.5);animation:pulse 1.6s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(63,158,70,.5)}70%{box-shadow:0 0 0 8px rgba(63,158,70,0)}100%{box-shadow:0 0 0 0 rgba(63,158,70,0)}}
   .wrap{max-width:none;width:100%;margin:0;padding:26px 32px 60px}
 
   /* KPIs */
@@ -127,7 +130,10 @@
       <button class="tab active" data-tab="analytics">Analytics</button>
       <button class="tab" data-tab="leads">Leads</button>
     </div>
-    <button class="btn ghost" id="logoutBtn">Sair</button>
+    <div style="display:flex;align-items:center;gap:14px">
+      <span class="live"><i></i> Ao vivo</span>
+      <button class="btn ghost" id="logoutBtn">Sair</button>
+    </div>
   </div>
 
   <div class="wrap">
@@ -186,7 +192,22 @@ async function boot(){
   const { data } = await db.auth.getSession();
   if(data.session){ showApp(); } else { loginView.hidden=false; appView.hidden=true; }
 }
-function showApp(){ loginView.hidden=true; appView.hidden=false; loadAnalytics(); loadLeads(); }
+function showApp(){ loginView.hidden=true; appView.hidden=false; loadAnalytics(); loadLeads(); setupRealtime(); }
+
+/* ===== TEMPO REAL ===== */
+let rtSetup=false;
+function setupRealtime(){
+  if(rtSetup) return; rtSetup=true;
+  let t; const refresh=()=>{ clearTimeout(t); t=setTimeout(()=>{ loadAnalytics(); loadLeads(); },1200); };
+  try{
+    db.channel('rt-dash')
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'events'},refresh)
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'leads'},refresh)
+      .subscribe();
+  }catch(e){ console.warn('realtime indisponível',e); }
+  // fallback: atualiza a cada 15s de qualquer forma
+  setInterval(()=>{ loadAnalytics(); loadLeads(); }, 15000);
+}
 
 /* ===== TABS ===== */
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
@@ -201,14 +222,14 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
 const FUNNEL=[
   {key:'Visitou o quiz', f:e=>e.event==='quiz_view'},
   {key:'Iniciou', f:e=>e.event==='quiz_start'},
-  {key:'P1 · Área', f:e=>e.event==='quiz_question_answered'&&e.step==='area'},
-  {key:'P2 · Dor', f:e=>e.event==='quiz_question_answered'&&e.step==='dor'},
-  {key:'P3 · WhatsApp', f:e=>e.event==='quiz_question_answered'&&e.step==='whats'},
-  {key:'P4 · Pós-envio', f:e=>e.event==='quiz_question_answered'&&e.step==='pos'},
-  {key:'P5 · Preço', f:e=>e.event==='quiz_question_answered'&&e.step==='preco'},
-  {key:'P6 · Materiais', f:e=>e.event==='quiz_question_answered'&&e.step==='materiais'},
-  {key:'P7 · Transformação', f:e=>e.event==='quiz_question_answered'&&e.step==='transf'},
-  {key:'P8 · Nota', f:e=>e.event==='quiz_question_answered'&&e.step==='auto'},
+  {key:'P1 · Área', f:e=>e.event==='quiz_step'&&e.step==='area'},
+  {key:'P2 · Dor', f:e=>e.event==='quiz_step'&&e.step==='dor'},
+  {key:'P3 · WhatsApp', f:e=>e.event==='quiz_step'&&e.step==='whats'},
+  {key:'P4 · Pós-envio', f:e=>e.event==='quiz_step'&&e.step==='pos'},
+  {key:'P5 · Preço', f:e=>e.event==='quiz_step'&&e.step==='preco'},
+  {key:'P6 · Materiais', f:e=>e.event==='quiz_step'&&e.step==='materiais'},
+  {key:'P7 · Transformação', f:e=>e.event==='quiz_step'&&e.step==='transf'},
+  {key:'P8 · Nota', f:e=>e.event==='quiz_step'&&e.step==='auto'},
   {key:'Concluiu', f:e=>e.event==='quiz_complete'},
   {key:'Viu o resultado', f:e=>e.event==='quiz_result_view'},
   {key:'Virou lead', f:e=>e.event==='lead_capturado'},
@@ -217,14 +238,15 @@ const FUNNEL=[
 ];
 
 async function loadAnalytics(){
-  const [{ count:visitors }, ev, ld] = await Promise.all([
-    db.from('visitors').select('visitor_id',{count:'exact',head:true}),
+  const [ev, ld] = await Promise.all([
     db.from('events').select('visitor_id,event,step,created_at').limit(100000),
     db.from('leads').select('perfil,beauty_score,created_at').limit(5000)
   ]);
   const events = ev.data||[];
   const leads = ld.data||[];
   const leadsCount = leads.length;
+  // visitantes únicos = visitor_id distintos nos eventos (robusto p/ qualquer aparelho)
+  const visitors = new Set(events.map(e=>e.visitor_id).filter(Boolean)).size;
 
   const counts = FUNNEL.map(node=>{ const s=new Set(); for(const e of events){ if(node.f(e)) s.add(e.visitor_id); } return s.size; });
   const top = Math.max(counts[0]||0, visitors||0, 1);
