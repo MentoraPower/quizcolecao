@@ -31,9 +31,10 @@
   .top{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1.5px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:60px}
   .brand{font-weight:700;letter-spacing:2px;font-size:15px;color:var(--brown-1)}
   .brand small{display:block;letter-spacing:0;font-size:11px;color:var(--muted);font-weight:600}
-  .tabs{display:flex;gap:4px}
-  .tab{border:0;background:none;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);padding:10px 16px;border-radius:10px}
-  .tab.active{background:var(--key-bg);color:var(--brown-1)}
+  .tabs{display:flex;gap:4px;background:var(--key-bg);border-radius:999px;padding:4px}
+  .tab{border:0;background:none;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);padding:9px 18px;border-radius:999px;transition:.15s}
+  .tab:hover{color:var(--brown-1)}
+  .tab.active{background:var(--brown-1);color:#fff}
   .wrap{max-width:none;width:100%;margin:0;padding:26px 32px 60px}
 
   /* KPIs */
@@ -56,6 +57,17 @@
   .fmeta .p{color:var(--brown-2)}
   .drop{color:#c0392b;font-size:12px;font-weight:600}
 
+  /* Gráficos */
+  .charts2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .chart{margin-top:10px}
+  .hbars{display:flex;flex-direction:column;gap:10px}
+  .hbar{display:grid;grid-template-columns:180px 1fr;align-items:center;gap:12px}
+  .hlbl{font-size:13px;font-weight:600;color:var(--ink)}
+  .htrack{position:relative;background:var(--key-bg);border-radius:8px;height:32px;overflow:hidden}
+  .hfill{height:100%;background:linear-gradient(90deg,var(--brown-soft),var(--brown-1));border-radius:8px;min-width:2px;transition:width .6s ease}
+  .hval{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:var(--brown-2)}
+  @media(max-width:900px){ .charts2{grid-template-columns:1fr} .hbar{grid-template-columns:130px 1fr} }
+
   /* Tabela leads */
   table{width:100%;border-collapse:collapse}
   th{text-align:left;font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);font-weight:700;padding:0 12px 12px}
@@ -72,10 +84,11 @@
   .field .k{font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:5px}
   .field .v{font-size:16px;font-weight:600;word-break:break-word}
   .field .v a{color:var(--brown-1)}
-  .qa{list-style:none}
-  .qa li{border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:#fff}
-  .qa .q{font-size:13px;color:var(--muted);margin-bottom:4px}
-  .qa .a{font-size:15px;font-weight:600}
+  .qa{list-style:none;display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .qa li{border:1.5px solid var(--line);border-radius:12px;padding:16px 18px;background:#fff}
+  .qa .q{font-size:13px;color:var(--muted);margin-bottom:6px;line-height:1.35}
+  .qa .a{font-size:16px;font-weight:600;color:var(--ink);line-height:1.4}
+  @media(max-width:720px){ .qa{grid-template-columns:1fr} }
   .muted{color:var(--muted)}
   .empty{color:var(--muted);text-align:center;padding:40px;font-size:15px}
   .loading{color:var(--muted);text-align:center;padding:40px}
@@ -123,8 +136,15 @@
       <div class="kpis" id="kpis"></div>
       <div class="card">
         <h2>Funil do quiz</h2>
-        <p class="sub">Visitantes únicos que chegaram em cada etapa. A % é sobre quem visitou; a queda é em relação à etapa anterior.</p>
         <div class="funnel" id="funnel"><div class="loading">Carregando...</div></div>
+      </div>
+      <div class="card">
+        <h2>Visitas por dia</h2>
+        <div class="chart" id="chartVisits"></div>
+      </div>
+      <div class="charts2">
+        <div class="card"><h2>Perfil dos leads</h2><div class="chart" id="chartPerfil"></div></div>
+        <div class="card"><h2>Beauty Score dos leads</h2><div class="chart" id="chartScore"></div></div>
       </div>
     </div>
 
@@ -197,18 +217,16 @@ const FUNNEL=[
 ];
 
 async function loadAnalytics(){
-  const [{ count:visitors }, ev, { count:leadsCount }] = await Promise.all([
+  const [{ count:visitors }, ev, ld] = await Promise.all([
     db.from('visitors').select('visitor_id',{count:'exact',head:true}),
-    db.from('events').select('visitor_id,event,step').limit(100000),
-    db.from('leads').select('id',{count:'exact',head:true})
+    db.from('events').select('visitor_id,event,step,created_at').limit(100000),
+    db.from('leads').select('perfil,beauty_score,created_at').limit(5000)
   ]);
   const events = ev.data||[];
-  // distintos por etapa
-  const counts = FUNNEL.map(node=>{
-    const s=new Set();
-    for(const e of events){ if(node.f(e)) s.add(e.visitor_id); }
-    return s.size;
-  });
+  const leads = ld.data||[];
+  const leadsCount = leads.length;
+
+  const counts = FUNNEL.map(node=>{ const s=new Set(); for(const e of events){ if(node.f(e)) s.add(e.visitor_id); } return s.size; });
   const top = Math.max(counts[0]||0, visitors||0, 1);
   const iniciou = counts[1]||0, concluiu = counts[10]||0;
 
@@ -216,7 +234,7 @@ async function loadAnalytics(){
     ['Visitantes únicos', visitors||0],
     ['Iniciaram o quiz', iniciou],
     ['Concluíram', concluiu],
-    ['Viraram lead', leadsCount||0],
+    ['Viraram lead', leadsCount],
     ['Taxa de conclusão', (visitors? Math.round(concluiu/visitors*100):0)+'%'],
   ].map(([l,n])=>`<div class="kpi"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
 
@@ -231,6 +249,50 @@ async function loadAnalytics(){
       <div class="fbarwrap"><div class="fbar" style="width:${w}%"></div>
       <div class="fmeta"><span class="c">${c}</span><span class="p">${pct}%</span></div></div></div>`;
   }).join('');
+
+  // Visitas por dia (montanha)
+  const byDay={};
+  events.forEach(e=>{ if(e.event==='quiz_view'&&e.created_at){ const d=e.created_at.slice(0,10); byDay[d]=(byDay[d]||0)+1; } });
+  const areaData=Object.keys(byDay).sort().map(d=>({label:d.slice(8,10)+'/'+d.slice(5,7), value:byDay[d]}));
+  $('#chartVisits').innerHTML = svgArea(areaData);
+
+  // Perfil dos leads (barras horizontais)
+  const perfis=['Apresentação improvisada','Valor pouco percebido','Profissional em crescimento','Marca em evolução'];
+  $('#chartPerfil').innerHTML = hBars(perfis.map(p=>({label:p, value:leads.filter(l=>l.perfil===p).length})));
+
+  // Beauty Score por faixa (barras)
+  const faixas=[['0–35',0,35],['36–60',36,60],['61–80',61,80],['81–100',81,100]];
+  $('#chartScore').innerHTML = svgBars(faixas.map(([lb,a,b])=>({label:lb, value:leads.filter(l=>l.beauty_score!=null&&l.beauty_score>=a&&l.beauty_score<=b).length})));
+}
+
+/* ===== Gráficos (SVG, sem libs) ===== */
+function svgArea(data){
+  if(!data.length) return '<div class="empty">Sem dados ainda.</div>';
+  const W=680,H=210,pl=34,pr=14,pt=14,pb=30, max=Math.max(1,...data.map(d=>d.value));
+  const iw=W-pl-pr, ih=H-pt-pb;
+  const xf=i=>pl+(data.length===1?iw/2:i*iw/(data.length-1)), yf=v=>pt+ih-(v/max*ih);
+  const pts=data.map((d,i)=>[xf(i),yf(d.value)]);
+  const line=pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const area=`${xf(0)},${pt+ih} `+line+` ${xf(data.length-1)},${pt+ih}`;
+  let grid=''; [0,.5,1].forEach(t=>{ const y=pt+ih-t*ih; grid+=`<line x1="${pl}" y1="${y}" x2="${W-pr}" y2="${y}" stroke="#efe9e2"/><text x="${pl-6}" y="${y+4}" text-anchor="end" font-size="11" fill="#8a7d74">${Math.round(max*t)}</text>`; });
+  let xl=''; const idxs=data.length<=7?data.map((_,i)=>i):[0,Math.floor(data.length/2),data.length-1];
+  idxs.forEach(i=>{ xl+=`<text x="${xf(i)}" y="${H-8}" text-anchor="middle" font-size="11" fill="#8a7d74">${data[i].label}</text>`; });
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block"><defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a97b4f" stop-opacity=".38"/><stop offset="1" stop-color="#a97b4f" stop-opacity="0"/></linearGradient></defs>${grid}<polygon points="${area}" fill="url(#ga)"/><polyline points="${line}" fill="none" stroke="#7a5230" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>${pts.map(p=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3" fill="#7a5230"/>`).join('')}${xl}</svg>`;
+}
+function hBars(data){
+  if(!data.length||data.every(d=>!d.value)) return '<div class="empty">Sem leads ainda.</div>';
+  const max=Math.max(1,...data.map(d=>d.value));
+  return '<div class="hbars">'+data.map(d=>`<div class="hbar"><div class="hlbl">${esc(d.label)}</div><div class="htrack"><div class="hfill" style="width:${Math.max(2,Math.round(d.value/max*100))}%"></div><span class="hval">${d.value}</span></div></div>`).join('')+'</div>';
+}
+function svgBars(data){
+  if(!data.length||data.every(d=>!d.value)) return '<div class="empty">Sem leads ainda.</div>';
+  const W=680,H=210,pl=16,pr=16,pt=20,pb=40, max=Math.max(1,...data.map(d=>d.value));
+  const iw=W-pl-pr, ih=H-pt-pb, gap=iw/data.length, bw=Math.min(90,gap*.6);
+  let out=''; data.forEach((d,i)=>{ const x=pl+gap*i+gap/2, h=d.value/max*ih, y=pt+ih-h;
+    out+=`<rect x="${(x-bw/2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1,h).toFixed(1)}" rx="6" fill="#7a5230"/>`;
+    out+=`<text x="${x}" y="${(y-7).toFixed(1)}" text-anchor="middle" font-size="14" font-weight="700" fill="#2b2320">${d.value}</text>`;
+    out+=`<text x="${x}" y="${H-14}" text-anchor="middle" font-size="12" fill="#8a7d74">${esc(d.label)}</text>`; });
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">${out}</svg>`;
 }
 
 /* ===== LEADS ===== */
@@ -275,7 +337,7 @@ function openLead(idx){
     <div class="card">
       <h2>Respostas do quiz</h2>
       <p class="sub">O que este lead selecionou em cada pergunta.</p>
-      ${resp && resp.length ? `<ul class="qa">${resp.map(r=>`<li><div class="q">${esc(r.pergunta)}</div><div class="a">${esc(r.resposta)}</div></li>`).join('')}</ul>` : '<div class="empty">Sem respostas registradas.</div>'}
+      ${resp && resp.length ? `<ul class="qa">${resp.map(r=>`<li><div class="q">${esc(r.pergunta)}</div><div class="a">${esc(cleanResp(r.resposta))}</div></li>`).join('')}</ul>` : '<div class="empty">Sem respostas registradas.</div>'}
     </div>`;
   $('#leadsList').hidden=true; $('#leadDetail').hidden=false;
   $('#backLeads').onclick=showLeadsList;
@@ -284,6 +346,7 @@ function openLead(idx){
 
 /* ===== helpers ===== */
 function esc(s){ return s==null?'':String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function cleanResp(s){ return String(s==null?'':s).replace(/^([A-J])(?=[A-ZÀ-Ý])/,''); } // remove prefixo de letra da opção (leads antigos)
 function tryJson(s){ try{return JSON.parse(s);}catch(e){return [];} }
 function fmtDate(s){ if(!s)return'—'; const d=new Date(s); return d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}); }
 
