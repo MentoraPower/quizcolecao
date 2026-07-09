@@ -232,6 +232,10 @@
   .bonus-body{padding:18px 20px 22px}
   .bonus-body h4{font-size:18px;font-weight:600;color:#4a3320;margin-bottom:8px}
   .bonus-body p{font-size:14px;line-height:1.5;color:#7a6a58}
+  .offer-top{max-width:1080px;margin:0 auto 14px;padding:0 4px}
+  .back-video{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1.5px solid var(--line);color:var(--brown-1);border-radius:999px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s}
+  .back-video:hover{border-color:var(--brown-1);background:#fbf8f5}
+  .back-video svg{width:17px;height:17px}
   .checkout-panel{padding-bottom:44px}
   .buy-card{background:#efe7dc;border-radius:20px;max-width:440px;margin:30px auto 0;padding:32px 28px 28px;text-align:center;position:relative}
   .buy-logo{font-size:21px;font-weight:700;letter-spacing:2px;color:#4a3320;margin-bottom:16px}
@@ -437,6 +441,10 @@
 
   <!-- ===== BÔNUS + CHECKOUT ===== -->
   <div class="step wide" data-step data-offer>
+    <div class="offer-top"><button type="button" class="back-video" id="backToVideo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
+      Voltar ao vídeo
+    </button></div>
     <section class="brown-panel">
       <h2 class="panel-title">Você ainda quer mais?</h2>
       <p class="panel-sub">Além de todos os materiais editáveis da Coleção Beauty, eu preparei alguns bônus para você.</p>
@@ -533,9 +541,9 @@ function novoId(){
 let VISITOR_ID, VISITOR_NEW=false;
 try{
   // limpa chaves antigas pra não sobrar id de versões anteriores
-  localStorage.removeItem('bq_vid'); localStorage.removeItem('bq_vid_v3');
-  VISITOR_ID=localStorage.getItem('bq_vid_v4');
-  if(!VISITOR_ID){ VISITOR_ID=novoId(); localStorage.setItem('bq_vid_v4',VISITOR_ID); VISITOR_NEW=true; }
+  ['bq_vid','bq_vid_v3','bq_vid_v4'].forEach(k=>localStorage.removeItem(k));
+  VISITOR_ID=localStorage.getItem('bq_vid_v5');
+  if(!VISITOR_ID){ VISITOR_ID=novoId(); localStorage.setItem('bq_vid_v5',VISITOR_ID); VISITOR_NEW=true; }
 }catch(e){ VISITOR_ID=novoId(); }
 
 function logEvent(ev,step){
@@ -791,7 +799,7 @@ function render(){
   if(el.getAttribute('data-loading')==='parcial') runParcial(el);
   if(el.getAttribute('data-loading')==='final') runFinal(el);
   if(el.hasAttribute('data-result')) preencheResultado();
-  if(el.hasAttribute('data-video')) loadVSL(); else stopVSL();
+  if(el.hasAttribute('data-video')){ if(vslLoaded) playVSL(); else loadVSL(); } else stopVSL();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 // Carrega o player da VSL SÓ quando o usuário chega na tela do vídeo (não antes).
@@ -812,8 +820,12 @@ function coletaMidia(root){
   return list;
 }
 function stopVSL(){
-  try{ coletaMidia(document).forEach(m=>{ try{ m.pause(); }catch(e){} }); }catch(e){}
+  try{ coletaMidia(document).forEach(m=>{ try{ m.pause(); m.muted=true; }catch(e){} }); }catch(e){}
 }
+function playVSL(){
+  try{ coletaMidia(document).forEach(m=>{ try{ m.muted=false; const p=m.play(); if(p&&p.catch)p.catch(()=>{}); }catch(e){} }); }catch(e){}
+}
+function goVideo(){ const n=steps.findIndex(s=>s.hasAttribute('data-video')); if(n>=0) go(n); }
 function go(n){ if(n>=0 && n<steps.length){ i=n; render(); } }
 function next(){
   let n=i+1;
@@ -826,6 +838,7 @@ backBtn.onclick=prev;
 document.getElementById('startBtn').onclick=()=>{ track('quiz_start'); next(); };
 document.getElementById('resCta').onclick=next;
 document.getElementById('videoCta').onclick=()=>{ track('offer_cta_click'); next(); };
+document.getElementById('backToVideo').onclick=goVideo;
 document.getElementById('checkout').addEventListener('click',()=>track('checkout_click'));
 
 /* ===================== "O QUE RECEBE" ===================== */
