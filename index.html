@@ -90,17 +90,23 @@
   .oc-inner{width:100%}
   /* DESKTOP: imagem como fundo à direita, conteúdo à esquerda em fluxo (sem vazar) */
   @media(min-width:900px){
-    .step[data-open]{margin-top:-52px}
-    .hero-wrap{width:100vw;margin-left:calc(-50vw + 50%);display:flex;align-items:center;
-      min-height:min(42vw,800px);
+    .step[data-open]{margin-top:-76px}                 /* remove a margem no topo */
+    .hero-wrap{width:100vw;margin-left:calc(-50vw + 50%);display:flex;align-items:flex-start;
+      min-height:min(41vw,790px);
       background:#F0ECE6 url('hero-desktop.webp') no-repeat top center;background-size:min(100%,1920px) auto}
     .hero-img{display:none}
-    .open-content{margin:0 auto;width:100%;max-width:1200px;padding:48px}
-    .oc-inner{max-width:460px}
-    .oc-inner h1{font-size:32px}
-    .oc-inner .btn.full{width:auto;padding:15px 30px;font-size:16px}
-    .oc-inner .btn svg{width:17px;height:17px}
-    .oc-inner .btn-row{margin-top:24px}
+    .open-content{margin:0 auto;width:100%;max-width:1240px;padding:clamp(34px,4.5vw,80px) 48px 48px}
+    .oc-inner{max-width:clamp(400px,32vw,480px)}
+    .oc-inner .open-badge{font-size:clamp(12px,.95vw,14px);margin-bottom:clamp(14px,1.4vw,22px)}
+    .oc-inner h1{font-size:clamp(24px,2.25vw,36px);line-height:1.22;margin-bottom:clamp(12px,1.2vw,18px)}
+    .oc-inner .open-list li{font-size:clamp(14px,1.05vw,17px);padding:clamp(5px,.5vw,9px) 0}
+    .oc-inner .open-list{margin:clamp(16px,1.6vw,24px) 0 clamp(20px,2vw,30px)}
+    .oc-inner .btn.full{width:auto;padding:clamp(13px,1vw,16px) clamp(26px,2vw,34px);font-size:clamp(15px,1.05vw,17px)}
+    .oc-inner .btn-row{margin-top:0}
+  }
+  /* Ultrawide: não deixa o hero gigante */
+  @media(min-width:1700px){
+    .hero-wrap{min-height:700px}
   }
 
   /* Abertura */
@@ -712,8 +718,10 @@ function render(){
   // barra vermelha só na oferta
   topbar.hidden=!isOffer;
   document.body.classList.toggle('has-topbar',isOffer);
-  // fundo #F0ECE6 só na primeira página (abertura)
-  document.body.classList.toggle('open-bg', el.hasAttribute('data-open'));
+  // fundo #F0ECE6 só na primeira página (abertura); barra de progresso escondida nela
+  const isOpen=el.hasAttribute('data-open');
+  document.body.classList.toggle('open-bg', isOpen);
+  document.querySelector('.progress').hidden=isOpen;
   // remarca a resposta já dada, ao voltar
   if(isQ){
     const id=el.getAttribute('data-q'); const a=answers[id]; const c=CFG[id];
