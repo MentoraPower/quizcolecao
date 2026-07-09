@@ -510,11 +510,30 @@ const ACCESS=[
   ["PDF de apresentação para cursos Beauty","PDF de alta conversão para vender cursos."]
 ];
 
-/* ===================== TRACKING ===================== */
+/* ===================== SUPABASE + VISITANTE + TRACKING ===================== */
+const SUPA_URL='https://knqfiqyvpglyfabsmmlm.supabase.co';
+const SUPA_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtucWZpcXl2cGdseWZhYnNtbWxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NDgxMzIsImV4cCI6MjA5OTEyNDEzMn0.DQfVd2XMpSjqkCyuX4SmIxNzMARjr9jFh0boTt2bZTI';
+const SUPA_HEADERS={'Content-Type':'application/json','apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON,'Prefer':'return=minimal'};
+
+// visitante único (id no localStorage)
+let VISITOR_ID, VISITOR_NEW=false;
+try{
+  VISITOR_ID=localStorage.getItem('bq_vid');
+  if(!VISITOR_ID){ VISITOR_ID=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('v'+Date.now()+Math.random().toString(36).slice(2)); localStorage.setItem('bq_vid',VISITOR_ID); VISITOR_NEW=true; }
+}catch(e){ VISITOR_ID='v'+Date.now(); }
+
+function logEvent(ev,step){
+  try{ fetch(SUPA_URL+'/rest/v1/events',{method:'POST',headers:SUPA_HEADERS,body:JSON.stringify({visitor_id:VISITOR_ID,event:ev,step:step||null}),keepalive:true}).catch(()=>{}); }catch(e){}
+}
+function initVisitor(){
+  if(!VISITOR_NEW) return;
+  try{ fetch(SUPA_URL+'/rest/v1/visitors',{method:'POST',headers:SUPA_HEADERS,body:JSON.stringify({visitor_id:VISITOR_ID}),keepalive:true}).catch(()=>{}); }catch(e){}
+}
 function track(ev,params){
   try{
     if(window.fbq) window.fbq('trackCustom',ev,params||{});
     (window.dataLayer=window.dataLayer||[]).push(Object.assign({event:ev},params||{}));
+    logEvent(ev,(params&&(params.question_id||params.step))||null);
   }catch(e){}
 }
 
@@ -628,9 +647,7 @@ function respostasArr(){
 }
 
 /* ===================== DIAGNÓSTICO (IA + fallback) ===================== */
-const SUPA_URL='https://knqfiqyvpglyfabsmmlm.supabase.co';
 const DIAG_URL=SUPA_URL+'/functions/v1/diagnostico';
-const SUPA_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtucWZpcXl2cGdseWZhYnNtbWxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NDgxMzIsImV4cCI6MjA5OTEyNDEzMn0.DQfVd2XMpSjqkCyuX4SmIxNzMARjr9jFh0boTt2bZTI';
 
 function fallbackDiag(score,perfil){
   return {
@@ -813,13 +830,14 @@ document.getElementById('leadForm').addEventListener('submit',e=>{
     nome:document.getElementById('leadNome').value.trim(),
     email:document.getElementById('leadEmail').value.trim(),
     telefone:ddiCode.textContent+' '+document.getElementById('leadTel').value.trim(),
-    beauty_score:score, perfil:perfil.nome, respostas:respostasArr()
+    beauty_score:score, perfil:perfil.nome, respostas:respostasArr(), visitor_id:VISITOR_ID
   });
   track('lead_capturado',{beauty_score:score, perfil:perfil.nome});
   next();
 });
 
 /* ===================== INÍCIO ===================== */
+initVisitor();
 track('quiz_view');
 render();
 </script>

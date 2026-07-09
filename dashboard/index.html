@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Coleção Beauty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--brown-1:#7a5230;--brown-2:#5a3a1e;--brown-soft:#a97b4f;--ink:#2b2320;--muted:#8a7d74;--line:#e7e0da;--line-soft:#f0ebe6;--bg:#faf7f3;--key-bg:#f7f3ef}
+  *{box-sizing:border-box;margin:0;padding:0}
+  [hidden]{display:none!important}
+  body{font-family:'Instrument Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+  input,button{font-family:inherit}
+
+  /* Login */
+  .login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .login-card{width:100%;max-width:380px;background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:32px 28px}
+  .login-card h1{font-size:22px;margin-bottom:6px}
+  .login-card p{color:var(--muted);font-size:14px;margin-bottom:22px}
+  .login-card label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:12px 0 6px}
+  .login-card input{width:100%;font-size:16px;border:1.5px solid var(--line);border-radius:10px;padding:13px 14px;color:var(--ink)}
+  .login-card input:focus{outline:none;border-color:var(--brown-1)}
+  .err{color:#c0392b;font-size:13px;margin-top:12px;min-height:18px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;cursor:pointer;padding:14px 24px;font-size:15px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--brown-soft),var(--brown-1) 60%,var(--brown-2));transition:.15s;text-decoration:none}
+  .btn:hover{filter:brightness(1.05)}
+  .btn.full{width:100%;margin-top:20px}
+  .btn.ghost{background:none;color:var(--brown-1);border:1.5px solid var(--line);padding:9px 16px;font-size:14px}
+
+  /* App */
+  .top{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1.5px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:60px}
+  .brand{font-weight:700;letter-spacing:2px;font-size:15px;color:var(--brown-1)}
+  .brand small{display:block;letter-spacing:0;font-size:11px;color:var(--muted);font-weight:600}
+  .tabs{display:flex;gap:4px}
+  .tab{border:0;background:none;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);padding:10px 16px;border-radius:10px}
+  .tab.active{background:var(--key-bg);color:var(--brown-1)}
+  .wrap{max-width:1300px;margin:0 auto;padding:26px 24px 60px}
+
+  /* KPIs */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:26px}
+  .kpi{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:18px 20px}
+  .kpi .n{font-size:30px;font-weight:800;letter-spacing:-.5px}
+  .kpi .l{font-size:13px;color:var(--muted);margin-top:2px}
+
+  /* Funil */
+  .card{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:20px}
+  .card h2{font-size:16px;margin-bottom:4px}
+  .card .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .funnel{display:flex;flex-direction:column;gap:9px}
+  .frow{display:grid;grid-template-columns:190px 1fr;align-items:center;gap:14px}
+  .fname{font-size:14px;font-weight:600;color:var(--ink)}
+  .fbarwrap{position:relative;background:var(--key-bg);border-radius:8px;height:38px;overflow:hidden}
+  .fbar{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--brown-soft),var(--brown-1));min-width:2px;transition:width .6s ease}
+  .fmeta{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:13px;font-weight:600}
+  .fmeta .c{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.2)}
+  .fmeta .p{color:var(--brown-2)}
+  .drop{color:#c0392b;font-size:12px;font-weight:600}
+
+  /* Tabela leads */
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);font-weight:700;padding:0 12px 12px}
+  td{padding:14px 12px;border-top:1px solid var(--line-soft);font-size:14px;vertical-align:middle}
+  tr.lead-row{cursor:pointer}
+  tr.lead-row:hover td{background:var(--key-bg)}
+  .badge{display:inline-block;background:var(--key-bg);border:1px solid var(--line);color:var(--brown-1);font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px}
+  .score-pill{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:var(--brown-1);color:#fff;font-weight:800;font-size:14px}
+
+  /* Detalhe do lead (100% largura) */
+  .detail-head{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+  .detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:26px}
+  .field{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px 16px}
+  .field .k{font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:5px}
+  .field .v{font-size:16px;font-weight:600;word-break:break-word}
+  .field .v a{color:var(--brown-1)}
+  .qa{list-style:none}
+  .qa li{border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:#fff}
+  .qa .q{font-size:13px;color:var(--muted);margin-bottom:4px}
+  .qa .a{font-size:15px;font-weight:600}
+  .muted{color:var(--muted)}
+  .empty{color:var(--muted);text-align:center;padding:40px;font-size:15px}
+  .loading{color:var(--muted);text-align:center;padding:40px}
+
+  @media(max-width:640px){
+    .frow{grid-template-columns:120px 1fr;gap:8px}
+    .fname{font-size:12px}
+    th:nth-child(3),td:nth-child(3){display:none}
+    .wrap{padding:20px 14px 50px}
+    .top{padding:0 14px}
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login" id="loginView">
+  <div class="login-card">
+    <h1>Dashboard</h1>
+    <p>Coleção Beauty — acesso restrito</p>
+    <form id="loginForm">
+      <label>E-mail</label>
+      <input type="email" id="email" autocomplete="username" required>
+      <label>Senha</label>
+      <input type="password" id="password" autocomplete="current-password" required>
+      <button type="submit" class="btn full" id="loginBtn">Entrar</button>
+      <div class="err" id="loginErr"></div>
+    </form>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appView" hidden>
+  <div class="top">
+    <div class="brand">COLEÇÃO BEAUTY<small>Dashboard</small></div>
+    <div class="tabs">
+      <button class="tab active" data-tab="analytics">Analytics</button>
+      <button class="tab" data-tab="leads">Leads</button>
+    </div>
+    <button class="btn ghost" id="logoutBtn">Sair</button>
+  </div>
+
+  <div class="wrap">
+    <!-- ANALYTICS -->
+    <div id="tabAnalytics">
+      <div class="kpis" id="kpis"></div>
+      <div class="card">
+        <h2>Funil do quiz</h2>
+        <p class="sub">Visitantes únicos que chegaram em cada etapa. A % é sobre quem visitou; a queda é em relação à etapa anterior.</p>
+        <div class="funnel" id="funnel"><div class="loading">Carregando...</div></div>
+      </div>
+    </div>
+
+    <!-- LEADS -->
+    <div id="tabLeads" hidden>
+      <div id="leadsList">
+        <div class="card">
+          <h2>Leads capturados</h2>
+          <p class="sub" id="leadsCount"></p>
+          <div id="leadsTable"><div class="loading">Carregando...</div></div>
+        </div>
+      </div>
+      <div id="leadDetail" hidden></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPA_URL='https://knqfiqyvpglyfabsmmlm.supabase.co';
+const SUPA_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtucWZpcXl2cGdseWZhYnNtbWxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NDgxMzIsImV4cCI6MjA5OTEyNDEzMn0.DQfVd2XMpSjqkCyuX4SmIxNzMARjr9jFh0boTt2bZTI';
+const db = supabase.createClient(SUPA_URL, SUPA_ANON);
+
+const $ = s=>document.querySelector(s);
+const loginView=$('#loginView'), appView=$('#appView');
+
+/* ===== AUTH ===== */
+$('#loginForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const btn=$('#loginBtn'); btn.disabled=true; $('#loginErr').textContent='';
+  const { error } = await db.auth.signInWithPassword({ email:$('#email').value.trim(), password:$('#password').value });
+  btn.disabled=false;
+  if(error){ $('#loginErr').textContent='E-mail ou senha inválidos.'; return; }
+  showApp();
+});
+$('#logoutBtn').addEventListener('click', async ()=>{ await db.auth.signOut(); loginView.hidden=false; appView.hidden=true; });
+
+async function boot(){
+  const { data } = await db.auth.getSession();
+  if(data.session){ showApp(); } else { loginView.hidden=false; appView.hidden=true; }
+}
+function showApp(){ loginView.hidden=true; appView.hidden=false; loadAnalytics(); loadLeads(); }
+
+/* ===== TABS ===== */
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===t));
+  const tab=t.getAttribute('data-tab');
+  $('#tabAnalytics').hidden = tab!=='analytics';
+  $('#tabLeads').hidden = tab!=='leads';
+  if(tab==='leads'){ showLeadsList(); }
+});
+
+/* ===== ANALYTICS / FUNIL ===== */
+const FUNNEL=[
+  {key:'Visitou o quiz', f:e=>e.event==='quiz_view'},
+  {key:'Iniciou', f:e=>e.event==='quiz_start'},
+  {key:'P1 · Área', f:e=>e.event==='quiz_question_answered'&&e.step==='area'},
+  {key:'P2 · Dor', f:e=>e.event==='quiz_question_answered'&&e.step==='dor'},
+  {key:'P3 · WhatsApp', f:e=>e.event==='quiz_question_answered'&&e.step==='whats'},
+  {key:'P4 · Pós-envio', f:e=>e.event==='quiz_question_answered'&&e.step==='pos'},
+  {key:'P5 · Preço', f:e=>e.event==='quiz_question_answered'&&e.step==='preco'},
+  {key:'P6 · Materiais', f:e=>e.event==='quiz_question_answered'&&e.step==='materiais'},
+  {key:'P7 · Transformação', f:e=>e.event==='quiz_question_answered'&&e.step==='transf'},
+  {key:'P8 · Nota', f:e=>e.event==='quiz_question_answered'&&e.step==='auto'},
+  {key:'Concluiu', f:e=>e.event==='quiz_complete'},
+  {key:'Viu o resultado', f:e=>e.event==='quiz_result_view'},
+  {key:'Virou lead', f:e=>e.event==='lead_capturado'},
+  {key:'Clicou na oferta', f:e=>e.event==='offer_cta_click'},
+  {key:'Foi pro checkout', f:e=>e.event==='checkout_click'},
+];
+
+async function loadAnalytics(){
+  const [{ count:visitors }, ev, { count:leadsCount }] = await Promise.all([
+    db.from('visitors').select('visitor_id',{count:'exact',head:true}),
+    db.from('events').select('visitor_id,event,step').limit(100000),
+    db.from('leads').select('id',{count:'exact',head:true})
+  ]);
+  const events = ev.data||[];
+  // distintos por etapa
+  const counts = FUNNEL.map(node=>{
+    const s=new Set();
+    for(const e of events){ if(node.f(e)) s.add(e.visitor_id); }
+    return s.size;
+  });
+  const top = Math.max(counts[0]||0, visitors||0, 1);
+  const iniciou = counts[1]||0, concluiu = counts[10]||0;
+
+  $('#kpis').innerHTML = [
+    ['Visitantes únicos', visitors||0],
+    ['Iniciaram o quiz', iniciou],
+    ['Concluíram', concluiu],
+    ['Viraram lead', leadsCount||0],
+    ['Taxa de conclusão', (visitors? Math.round(concluiu/visitors*100):0)+'%'],
+  ].map(([l,n])=>`<div class="kpi"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
+
+  const base = counts[0]||visitors||1;
+  $('#funnel').innerHTML = FUNNEL.map((node,i)=>{
+    const c=counts[i];
+    const pct = base? Math.round(c/base*100):0;
+    const w = Math.max(2, Math.round(c/top*100));
+    const drop = i>0 ? counts[i-1]-c : 0;
+    const dropTxt = i>0 && counts[i-1]>0 ? ` <span class="drop">−${Math.round(drop/counts[i-1]*100)}%</span>` : '';
+    return `<div class="frow"><div class="fname">${node.key}${dropTxt}</div>
+      <div class="fbarwrap"><div class="fbar" style="width:${w}%"></div>
+      <div class="fmeta"><span class="c">${c}</span><span class="p">${pct}%</span></div></div></div>`;
+  }).join('');
+}
+
+/* ===== LEADS ===== */
+let LEADS=[];
+async function loadLeads(){
+  const { data, error } = await db.from('leads').select('*').order('created_at',{ascending:false}).limit(2000);
+  if(error){ $('#leadsTable').innerHTML='<div class="empty">Erro ao carregar.</div>'; return; }
+  LEADS=data||[];
+  $('#leadsCount').textContent = LEADS.length+' lead'+(LEADS.length===1?'':'s');
+  if(!LEADS.length){ $('#leadsTable').innerHTML='<div class="empty">Nenhum lead ainda.</div>'; return; }
+  $('#leadsTable').innerHTML = `<table><thead><tr>
+      <th>Nome</th><th>E-mail</th><th>WhatsApp</th><th>Perfil</th><th>Score</th><th>Data</th>
+    </tr></thead><tbody>${LEADS.map((l,idx)=>`
+      <tr class="lead-row" data-i="${idx}">
+        <td><b>${esc(l.nome)||'—'}</b></td>
+        <td>${esc(l.email)||'—'}</td>
+        <td>${esc(l.telefone)||'—'}</td>
+        <td>${l.perfil?`<span class="badge">${esc(l.perfil)}</span>`:'—'}</td>
+        <td>${l.beauty_score!=null?`<span class="score-pill">${l.beauty_score}</span>`:'—'}</td>
+        <td class="muted">${fmtDate(l.created_at)}</td>
+      </tr>`).join('')}</tbody></table>`;
+  document.querySelectorAll('.lead-row').forEach(r=>r.onclick=()=>openLead(+r.getAttribute('data-i')));
+}
+function showLeadsList(){ $('#leadsList').hidden=false; $('#leadDetail').hidden=true; }
+function openLead(idx){
+  const l=LEADS[idx]; if(!l) return;
+  const resp = Array.isArray(l.respostas)? l.respostas : (l.respostas? tryJson(l.respostas):[]);
+  $('#leadDetail').innerHTML = `
+    <div class="detail-head">
+      <button class="btn ghost" id="backLeads">← Voltar</button>
+      <h2 style="font-size:20px">${esc(l.nome)||'Lead'}</h2>
+      ${l.beauty_score!=null?`<span class="score-pill" style="width:44px;height:44px;font-size:16px">${l.beauty_score}</span>`:''}
+    </div>
+    <div class="detail-grid">
+      <div class="field"><div class="k">Nome</div><div class="v">${esc(l.nome)||'—'}</div></div>
+      <div class="field"><div class="k">E-mail</div><div class="v"><a href="mailto:${esc(l.email)}">${esc(l.email)||'—'}</a></div></div>
+      <div class="field"><div class="k">WhatsApp</div><div class="v"><a href="https://wa.me/${(l.telefone||'').replace(/[^0-9]/g,'')}" target="_blank">${esc(l.telefone)||'—'}</a></div></div>
+      <div class="field"><div class="k">Perfil</div><div class="v">${esc(l.perfil)||'—'}</div></div>
+      <div class="field"><div class="k">Beauty Score</div><div class="v">${l.beauty_score!=null?l.beauty_score+' / 100':'—'}</div></div>
+      <div class="field"><div class="k">Data</div><div class="v">${fmtDate(l.created_at)}</div></div>
+    </div>
+    <div class="card">
+      <h2>Respostas do quiz</h2>
+      <p class="sub">O que este lead selecionou em cada pergunta.</p>
+      ${resp && resp.length ? `<ul class="qa">${resp.map(r=>`<li><div class="q">${esc(r.pergunta)}</div><div class="a">${esc(r.resposta)}</div></li>`).join('')}</ul>` : '<div class="empty">Sem respostas registradas.</div>'}
+    </div>`;
+  $('#leadsList').hidden=true; $('#leadDetail').hidden=false;
+  $('#backLeads').onclick=showLeadsList;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ===== helpers ===== */
+function esc(s){ return s==null?'':String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function tryJson(s){ try{return JSON.parse(s);}catch(e){return [];} }
+function fmtDate(s){ if(!s)return'—'; const d=new Date(s); return d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}); }
+
+boot();
+</script>
+</body>
+</html>
