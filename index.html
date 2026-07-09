@@ -436,6 +436,9 @@
     <section class="access-section">
       <h3 class="access-title">Tudo o que você recebe na Coleção Beauty:</h3>
       <div class="access-grid" data-access></div>
+      <div class="btn-row" style="max-width:520px;margin:26px auto 0">
+        <button class="btn full" id="videoCta2">Quero conhecer a Coleção Beauty</button>
+      </div>
     </section>
   </div>
 
@@ -841,7 +844,9 @@ backBtn.onclick=prev;
 
 document.getElementById('startBtn').onclick=()=>{ track('quiz_start'); next(); };
 document.getElementById('resCta').onclick=next;
-document.getElementById('videoCta').onclick=()=>{ track('offer_cta_click'); next(); };
+const irParaOferta=()=>{ track('offer_cta_click'); next(); };
+document.getElementById('videoCta').onclick=irParaOferta;
+document.getElementById('videoCta2').onclick=irParaOferta;
 document.getElementById('backToVideo').onclick=goVideo;
 document.getElementById('checkout').addEventListener('click',()=>track('checkout_click'));
 
