@@ -7,6 +7,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- VSL (vturb/ConverteAI) — otimização -->
+<script>!function(i,n){i._plt=i._plt||(n&&n.timeOrigin?n.timeOrigin+n.now():Date.now())}(window,performance);</script>
+<link rel="preload" href="https://scripts.converteai.net/2fe3fa7a-4b6e-44f7-be18-0c3cce42c4c0/players/6a4fe712b64d075550452eaa/v4/player.js" as="script">
+<link rel="preload" href="https://scripts.converteai.net/lib/js/smartplayer-wc/v4/smartplayer.js" as="script">
+<link rel="preload" href="https://cdn.converteai.net/2fe3fa7a-4b6e-44f7-be18-0c3cce42c4c0/6a4fe57337b91d9ff591fe1b/main.m3u8" as="fetch">
+<link rel="dns-prefetch" href="https://cdn.converteai.net">
+<link rel="dns-prefetch" href="https://scripts.converteai.net">
+<link rel="dns-prefetch" href="https://images.converteai.net">
+<link rel="dns-prefetch" href="https://license.vturb.com">
 <style>
   :root{
     --brown-1:#7a5230; --brown-2:#5a3a1e; --brown-soft:#a97b4f;
@@ -192,6 +201,7 @@
 
   /* Vídeo (VSL) */
   .video-narrow{max-width:600px;margin:0 auto}
+  .vsl-box{width:100%;margin:22px 0;border-radius:14px;overflow:hidden;background:#000}
   .video-box{position:relative;width:100%;aspect-ratio:16/9;background:#f3efeb;border-radius:14px;overflow:hidden;border:1.5px solid var(--line);margin:22px 0;display:flex;align-items:center;justify-content:center;text-align:center}
   .video-box iframe{width:100%;height:100%;border:0}
   .video-ph{color:var(--muted);font-size:14px;padding:20px;line-height:1.6}
@@ -412,10 +422,10 @@
     <div class="video-narrow">
       <h2>Existe uma forma simples de resolver isso</h2>
       <p class="sub">A Coleção Beauty é uma coleção com mais de 20 materiais prontos e editáveis para você transmitir mais valor, vender melhor pelo WhatsApp e apresentar seus serviços de forma muito mais profissional. Assista abaixo para entender como funciona.</p>
-      <div class="video-box">
-        <!-- TROCAR: cole aqui o embed do VÍDEO (VSL) -->
-        <div class="video-ph"><svg class="play-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M10 8.5l6 3.5-6 3.5z" fill="currentColor" stroke="none"/></svg><b>Vídeo, A solução</b>Cole aqui o embed do vídeo<br>apresentando a Coleção Beauty.</div>
+      <div class="vsl-box">
+        <vturb-smartplayer id="vid-6a4fe712b64d075550452eaa" style="display:block;margin:0 auto;width:100%;"><div class="vturb-player-placeholder" style="position:relative;width:100%;padding:56.25% 0 0;z-index:0;background-color:black;"></div></vturb-smartplayer>
       </div>
+      <script type="text/javascript">var s=document.createElement("script");s.src="https://scripts.converteai.net/2fe3fa7a-4b6e-44f7-be18-0c3cce42c4c0/players/6a4fe712b64d075550452eaa/v4/player.js",s.async=!0,document.head.appendChild(s);</script>
       <div class="btn-row" style="max-width:520px;margin-left:auto;margin-right:auto">
         <button class="btn full" id="videoCta">Quero conhecer a Coleção Beauty</button>
       </div>
