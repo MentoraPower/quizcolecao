@@ -17,7 +17,8 @@
   [hidden]{display:none!important}
   html,body{height:100%}
   body{font-family:'Instrument Sans','Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;
-    background:var(--bg);color:var(--ink);display:flex;flex-direction:column;min-height:100vh;-webkit-font-smoothing:antialiased}
+    background:var(--bg);color:var(--ink);display:flex;flex-direction:column;min-height:100vh;-webkit-font-smoothing:antialiased;transition:background .3s}
+  body.open-bg{background:#F0ECE6}
   input,textarea,select,button{font-family:inherit}
   input,textarea,select{font-size:16px}
 
@@ -90,10 +91,11 @@
   /* DESKTOP: imagem como fundo à direita, conteúdo à esquerda em fluxo (sem vazar) */
   @media(min-width:900px){
     .step[data-open]{margin-top:-52px}
-    .hero-wrap{width:100vw;margin-left:calc(-50vw + 50%);min-height:540px;display:flex;align-items:center;
-      background:#f3efe9 url('hero-desktop.webp') no-repeat right center;background-size:auto 100%}
+    .hero-wrap{width:100vw;margin-left:calc(-50vw + 50%);display:flex;align-items:center;
+      min-height:min(42vw,800px);
+      background:#F0ECE6 url('hero-desktop.webp') no-repeat top center;background-size:min(100%,1920px) auto}
     .hero-img{display:none}
-    .open-content{margin:0;width:100%;max-width:1200px;margin-left:auto;margin-right:auto;padding:40px 48px}
+    .open-content{margin:0 auto;width:100%;max-width:1200px;padding:48px}
     .oc-inner{max-width:460px}
     .oc-inner h1{font-size:32px}
   }
@@ -709,6 +711,8 @@ function render(){
   // barra vermelha só na oferta
   topbar.hidden=!isOffer;
   document.body.classList.toggle('has-topbar',isOffer);
+  // fundo #F0ECE6 só na primeira página (abertura)
+  document.body.classList.toggle('open-bg', el.hasAttribute('data-open'));
   // remarca a resposta já dada, ao voltar
   if(isQ){
     const id=el.getAttribute('data-q'); const a=answers[id]; const c=CFG[id];
