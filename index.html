@@ -64,14 +64,15 @@
   .opt.multi.selected{border-color:var(--brown-1);background:#fbf5ef}
   .opt.multi.selected .box{background:var(--brown-1);border-color:var(--brown-1)}
   .opt.multi.selected .box svg{opacity:1}
+  .opt-thumb{flex:none;width:46px;height:34px;object-fit:cover;border-radius:7px;border:1px solid var(--line)}
+  .opt-lbl{flex:1;min-width:0}
 
   /* Escala 1 a 10 */
-  .scale{display:grid;grid-template-columns:repeat(10,1fr);gap:7px;margin-top:26px}
-  .scale button{aspect-ratio:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;font-size:16px;font-weight:700;
+  .scale{display:grid;grid-template-columns:repeat(5,1fr);gap:11px;margin-top:26px}
+  .scale button{height:64px;border:1.5px solid var(--line);background:#fff;border-radius:12px;font-size:19px;font-weight:700;
     color:var(--ink);cursor:pointer;transition:.15s}
-  .scale button:hover{border-color:var(--brown-1)}
+  .scale button:hover{border-color:var(--brown-1);background:#fbf8f5}
   .scale button.selected{background:var(--brown-1);color:#fff;border-color:var(--brown-1)}
-  .scale-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-top:10px}
 
   /* Botões */
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;border-radius:999px;cursor:pointer;
@@ -258,8 +259,8 @@
     h2{font-size:23px}
     .options{margin-top:22px}
     .opt{font-size:16px;padding:14px}
-    .scale{gap:5px}
-    .scale button{font-size:15px}
+    .scale{gap:8px}
+    .scale button{height:56px;font-size:17px}
     .access-section{padding:32px 20px 36px;border-radius:18px}
     .access-title{font-size:22px}
     .access-grid{grid-template-columns:1fr;gap:24px}
@@ -485,10 +486,11 @@ const CFG = {
   preco:{n:5, tipo:'single', w:2, titulo:'Quando uma cliente diz "Está caro", qual é o seu primeiro pensamento?',
     opts:[['Ela não percebeu o valor do meu trabalho.',2],['Acho que não expliquei direito.',1],['Acabo oferecendo desconto.',0],['Fico insegura.',0],['Isso quase nunca acontece.',4]]},
   materiais:{n:6, tipo:'multi', w:2, titulo:'Quais destes materiais você possui hoje?', sub:'Você pode marcar mais de um.',
+    imgs:[1,8,10,3,5,9,null],
     opts:[['Catálogo dos procedimentos'],['Material de pós-atendimento'],['Vale-presente'],['Cardápio de serviços'],['Material profissional para WhatsApp'],['Identidade visual padronizada'],['Nenhum deles']]},
   transf:{n:7, tipo:'single', w:0, titulo:'Se a sua apresentação transmitisse mais profissionalismo, o que você acredita que mudaria primeiro?',
     opts:[['Conseguiria cobrar melhor.'],['Fecharia mais clientes.'],['Minhas clientes confiariam mais em mim.'],['Venderia mais procedimentos.'],['Todas as alternativas.']]},
-  auto:{n:8, tipo:'scale', w:2, titulo:'De 1 a 10, quanto você acredita que as suas clientes enxergam o verdadeiro valor do seu trabalho antes de perguntarem o preço?', sub:'1 = Quase nada    ·    10 = Enxergam muito valor'}
+  auto:{n:8, tipo:'scale', w:2, titulo:'De 1 a 10, quanto você acredita que as suas clientes enxergam o verdadeiro valor do seu trabalho antes de perguntarem o preço?'}
 };
 const TOTAL_Q = 8;
 const KEYS = "ABCDEFGHIJ";
@@ -533,18 +535,22 @@ let i=0;
 steps.forEach(step=>{
   const id=step.getAttribute('data-q'); if(!id) return;
   const c=CFG[id];
+  const si=steps.indexOf(step);
   let html='<h2>'+c.titulo+'</h2>';
   if(c.sub) html+='<p class="sub">'+c.sub+'</p>';
   if(c.tipo==='single'){
     html+='<div class="options">'+c.opts.map((o,k)=>'<button class="opt" data-oi="'+k+'"><span class="key">'+KEYS[k]+'</span>'+o[0]+checkSvg+'</button>').join('')+'</div>';
   }else if(c.tipo==='multi'){
     const cbox='<span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span>';
-    html+='<div class="options">'+c.opts.map((o,k)=>'<button class="opt multi" data-oi="'+k+'">'+cbox+o[0]+'</button>').join('')+'</div>'+
+    html+='<div class="options">'+c.opts.map((o,k)=>{
+      const im=(c.imgs&&c.imgs[k])?'<img class="opt-thumb" src="colecao-'+c.imgs[k]+'.png" alt="" loading="lazy">':'';
+      return '<button class="opt multi'+(im?' has-thumb':'')+'" data-oi="'+k+'">'+cbox+im+'<span class="opt-lbl">'+o[0]+'</span></button>';
+    }).join('')+'</div>'+
       '<div class="btn-row"><button class="btn full" data-continue disabled>Continuar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>';
   }else if(c.tipo==='scale'){
     let sc='<div class="scale">';
     for(let v=1;v<=10;v++) sc+='<button data-v="'+v+'">'+v+'</button>';
-    sc+='</div><div class="scale-labels"><span>Quase nada</span><span>Muito valor</span></div>';
+    sc+='</div>';
     html+=sc;
   }
   step.innerHTML=html;
@@ -552,8 +558,10 @@ steps.forEach(step=>{
   if(c.tipo==='single'){
     step.querySelectorAll('.opt').forEach((b,k)=>{
       b.onclick=()=>{
+        const changed=!answers[id]||answers[id].oi!==k;
         answers[id]={label:c.opts[k][0], pts:c.opts[k][1], oi:k};
         step.querySelectorAll('.opt').forEach((x,n)=>x.classList.toggle('selected',n===k));
+        if(changed) resetLoadingsAfter(si);
         track('quiz_question_answered',{question_id:id});
         setTimeout(next,190);
       };
@@ -575,7 +583,9 @@ steps.forEach(step=>{
       const labels=sel.map(k=>c.opts[k][0]);
       const nenhum=sel.includes(nenhumIdx);
       const cnt=nenhum?0:labels.length;
+      const changed=!answers[id]||(answers[id].labels||[]).join('|')!==labels.join('|');
       answers[id]={labels, pts:Math.min(4,cnt)};
+      if(changed) resetLoadingsAfter(si);
       track('quiz_question_answered',{question_id:id});
       next();
     };
@@ -583,8 +593,10 @@ steps.forEach(step=>{
     step.querySelectorAll('.scale button').forEach(b=>{
       b.onclick=()=>{
         const v=+b.getAttribute('data-v');
+        const changed=!answers[id]||answers[id].value!==v;
         step.querySelectorAll('.scale button').forEach(x=>x.classList.toggle('selected',x===b));
         answers[id]={value:v, pts:Math.round((v-1)/9*4)};
+        if(changed) resetLoadingsAfter(si);
         track('quiz_question_answered',{question_id:id});
         setTimeout(next,220);
       };
@@ -684,27 +696,35 @@ function runChecklist(ul, dur, cb){
   items.forEach((li,k)=> setTimeout(()=>li.classList.add('done'), gap*(k+1)));
   if(cb) setTimeout(cb, dur+250);
 }
-let parcialDone=false;
-function runParcial(step){
-  if(step.dataset.ran) return; step.dataset.ran='1';
-  track('quiz_mid_loading_view');
-  runChecklist(step.querySelector('.checklist'), 2800, next);
+// Zera os loadings que vêm DEPOIS de uma pergunta que mudou, pra reexecutarem.
+function resetLoadingsAfter(si){
+  steps.forEach((s,n)=>{ if(n>si && s.getAttribute('data-loading')){ s.dataset.done=''; s.dataset.running=''; } });
 }
-let finalRan=false;
+function resetChecklist(cl){ [...cl.querySelectorAll('li')].forEach(li=>li.classList.remove('done')); }
+
+function runParcial(step){
+  if(step.dataset.done){ next(); return; }        // já feito e sem mudança -> passa direto
+  if(step.dataset.running) return; step.dataset.running='1';
+  track('quiz_mid_loading_view');
+  const cl=step.querySelector('.checklist'); resetChecklist(cl);
+  runChecklist(cl, 2800, ()=>{ step.dataset.done='1'; step.dataset.running=''; next(); });
+}
 function runFinal(step){
-  if(step.dataset.ran) return; step.dataset.ran='1';
+  if(step.dataset.done){ next(); return; }         // já gerado e sem mudança -> vai pro resultado
+  if(step.dataset.running) return; step.dataset.running='1';
   track('quiz_complete');
+  // A IA vê TODAS as respostas aqui (última etapa antes do diagnóstico)
   const score=calcScore(), perfil=perfilDe(score);
   const diagP=fetchDiag(score,perfil).then(d=>{diagData=d;});
-  // porcentagem subindo
-  const pctEl=document.getElementById('loadPct'); let p=0;
+  const pctEl=document.getElementById('loadPct'); pctEl.textContent='0%'; let p=0;
   const pt=setInterval(()=>{ p=Math.min(99,p+2); pctEl.textContent=p+'%'; if(p>=99)clearInterval(pt); },95);
   const MIN=4800;
-  runChecklist(step.querySelector('.checklist'), MIN, null);
+  const cl=step.querySelector('.checklist'); resetChecklist(cl);
+  runChecklist(cl, MIN, null);
   const started=Date.now();
   diagP.then(()=>{
     const wait=Math.max(0,MIN-(Date.now()-started));
-    setTimeout(()=>{ clearInterval(pt); pctEl.textContent='100%'; setTimeout(next,250); }, wait);
+    setTimeout(()=>{ clearInterval(pt); pctEl.textContent='100%'; step.dataset.done='1'; step.dataset.running=''; setTimeout(next,250); }, wait);
   });
 }
 
@@ -743,7 +763,11 @@ function render(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function go(n){ if(n>=0 && n<steps.length){ i=n; render(); } }
-function next(){ if(i<steps.length-1) go(i+1); }
+function next(){
+  let n=i+1;
+  while(n<steps.length-1 && steps[n].getAttribute('data-loading') && steps[n].dataset.done) n++;
+  go(n);
+}
 function prev(){ let n=i-1; while(n>0 && steps[n].getAttribute('data-loading')) n--; go(n); }
 backBtn.onclick=prev;
 
