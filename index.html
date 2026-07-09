@@ -403,8 +403,8 @@
     <h2>Falta pouco para o seu Plano Beauty</h2>
     <p class="sub">Preencha abaixo para receber o seu plano personalizado e ver como resolver esses pontos.</p>
     <form class="lead-form" id="leadForm">
-      <input type="text" id="leadNome" placeholder="Seu nome" autocomplete="name" required>
-      <input type="email" id="leadEmail" placeholder="Seu melhor e-mail" autocomplete="email" required>
+      <input type="text" id="leadNome" name="nome" placeholder="Seu nome" autocomplete="name" required>
+      <input type="email" id="leadEmail" name="email" placeholder="Seu melhor e-mail" autocomplete="email" required>
       <div class="phone-field">
         <div class="phone-row">
           <button type="button" class="ddi-btn" id="ddiBtn" aria-label="Selecionar país">
@@ -412,7 +412,7 @@
             <span id="ddiCode">+55</span>
             <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
           </button>
-          <input type="tel" id="leadTel" placeholder="Seu WhatsApp" autocomplete="tel" required>
+          <input type="tel" id="leadTel" name="telefone" placeholder="Seu WhatsApp" autocomplete="tel" required>
         </div>
         <div class="ddi-panel" id="ddiPanel" hidden>
           <input type="text" class="ddi-search" id="ddiSearch" placeholder="Buscar país" autocomplete="off">
@@ -541,9 +541,9 @@ function novoId(){
 let VISITOR_ID, VISITOR_NEW=false;
 try{
   // limpa chaves antigas pra não sobrar id de versões anteriores
-  ['bq_vid','bq_vid_v3','bq_vid_v4'].forEach(k=>localStorage.removeItem(k));
-  VISITOR_ID=localStorage.getItem('bq_vid_v5');
-  if(!VISITOR_ID){ VISITOR_ID=novoId(); localStorage.setItem('bq_vid_v5',VISITOR_ID); VISITOR_NEW=true; }
+  ['bq_vid','bq_vid_v3','bq_vid_v4','bq_vid_v5'].forEach(k=>localStorage.removeItem(k));
+  VISITOR_ID=localStorage.getItem('bq_vid_v6');
+  if(!VISITOR_ID){ VISITOR_ID=novoId(); localStorage.setItem('bq_vid_v6',VISITOR_ID); VISITOR_NEW=true; }
 }catch(e){ VISITOR_ID=novoId(); }
 
 function logEvent(ev,step){
@@ -879,6 +879,29 @@ function salvaLead(dados){
     fetch(SUPA_URL+'/rest/v1/leads',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON,'Prefer':'return=minimal'},body:JSON.stringify(dados),signal:ctrl.signal,keepalive:true}).then(()=>clearTimeout(t)).catch(err=>console.warn('lead:',err));
   }catch(err){ console.warn('lead:',err); }
 }
+/* Aciona o Lead do loader do Pixel/CAPI (tqqqnmdffmzolnlrggqd).
+   O loader escuta eventos de sucesso do Elementor e/ou o elemento .elementor-message-success.
+   Rodamos num tick seguinte (depois do loader capturar os campos no submit) e usamos os dois
+   caminhos; a trava interna do loader garante que o Lead dispara uma única vez. */
+function dispararLeadPixel(){
+  setTimeout(function(){
+    try{
+      document.dispatchEvent(new Event('elementor/forms/success'));
+      window.dispatchEvent(new Event('elementor/forms/success'));
+      document.dispatchEvent(new Event('elementor_pro/forms/submit_success'));
+      window.dispatchEvent(new Event('elementor_pro/forms/submit_success'));
+    }catch(e){}
+    // Fallback: injeta a mensagem de sucesso que o MutationObserver do loader observa
+    try{
+      const ok=document.createElement('div');
+      ok.className='elementor-message elementor-message-success';
+      ok.style.cssText='position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden';
+      document.body.appendChild(ok);
+      setTimeout(function(){ if(ok.parentNode) ok.parentNode.removeChild(ok); },600);
+    }catch(e){}
+  },0);
+}
+
 document.getElementById('leadForm').addEventListener('submit',e=>{
   e.preventDefault();
   if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
@@ -890,12 +913,22 @@ document.getElementById('leadForm').addEventListener('submit',e=>{
     beauty_score:score, perfil:perfil.nome, respostas:respostasArr(), visitor_id:VISITOR_ID
   });
   track('lead_capturado',{beauty_score:score, perfil:perfil.nome});
-  next();
+  dispararLeadPixel();       // aciona o Lead do loader (Pixel + CAPI) com nome/email/telefone
+  setTimeout(next,220);      // dá tempo do loader varrer os campos e enviar antes de trocar de tela
 });
 
 /* ===================== INÍCIO ===================== */
 initVisitor();
-track('quiz_view');
+/* quiz_view: só dispara na página do quiz (tela inicial + etapas presentes) e uma única vez
+   por visita, cobrindo todo o funil até a oferta. Abrir /dashboard ou reload não conta de novo. */
+(function(){
+  var isQuiz = !!document.getElementById('startBtn') && steps.length>0;
+  if(!isQuiz) return;
+  var ja=false; try{ ja=!!sessionStorage.getItem('bq_viewed_v6'); }catch(e){}
+  if(ja) return;
+  try{ sessionStorage.setItem('bq_viewed_v6','1'); }catch(e){}
+  track('quiz_view');
+})();
 render();
 </script>
 </body>

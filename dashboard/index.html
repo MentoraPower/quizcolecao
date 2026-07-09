@@ -50,15 +50,47 @@
   .card{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:20px}
   .card h2{font-size:16px;margin-bottom:4px}
   .card .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
-  .funnel{display:flex;flex-direction:column;gap:9px}
-  .frow{display:grid;grid-template-columns:190px 1fr;align-items:center;gap:14px}
-  .fname{font-size:14px;font-weight:600;color:var(--ink)}
-  .fbarwrap{position:relative;background:var(--key-bg);border-radius:8px;height:38px;overflow:hidden}
-  .fbar{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--brown-soft),var(--brown-1));min-width:2px;transition:width .6s ease}
-  .fmeta{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:13px;font-weight:600}
-  .fmeta .c{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.2)}
-  .fmeta .p{color:var(--brown-2)}
-  .drop{color:#c0392b;font-size:12px;font-weight:600}
+  .funnel{overflow-x:auto;overflow-y:hidden;padding:6px 2px 12px;-webkit-overflow-scrolling:touch}
+  .funnel::-webkit-scrollbar{height:9px}
+  .funnel::-webkit-scrollbar-thumb{background:#e0d6ca;border-radius:999px}
+  .fnl-track{display:flex;align-items:flex-start;min-width:min-content}
+  .fnl-col{flex:0 0 auto;width:150px;display:flex;flex-direction:column;align-items:center}
+  .fnl-link{flex:0 0 auto;width:30px;height:267px;display:flex;align-items:center;justify-content:center;color:var(--brown-soft)}
+  .fnl-meta{text-align:center;margin-top:11px;width:150px}
+  .fnl-meta .num{font-size:22px;font-weight:800;color:var(--ink);line-height:1}
+  .fnl-meta .num .dp{font-size:11px;font-weight:700;color:#c0392b;margin-left:5px;vertical-align:middle}
+  .fnl-meta .pct{font-size:12px;font-weight:700;color:var(--brown-1);margin-top:3px}
+  .fnl-meta .nm{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.25;min-height:28px}
+
+  /* Mini-tela 9:16 (1080x1920) */
+  .phone{width:150px;height:267px;background:#F0ECE6;border:5px solid #fff;border-radius:20px;box-shadow:0 8px 20px rgba(60,40,25,.16);overflow:hidden;position:relative}
+  .phone .scr{position:absolute;inset:0;padding:12px 10px;display:flex;flex-direction:column;gap:6px}
+  .ph-t{font-size:8px;font-weight:700;color:var(--ink);line-height:1.3}
+  .ph-ops{display:flex;flex-direction:column;gap:4px;margin-top:2px}
+  .ph-op{height:15px;background:#fff;border:1px solid #e6ddd3;border-radius:6px}
+  .ph-op.sel{border-color:var(--brown-1);background:#f4ece2}
+  .ph-btn{height:16px;border-radius:999px;background:linear-gradient(135deg,var(--brown-soft),var(--brown-1));margin-top:auto}
+  .ph-hero-img{height:118px;border-radius:12px;background:#dfd5c9 center/cover no-repeat;background-image:url('../hero-mobile.webp')}
+  .ph-h{height:7px;border-radius:3px;background:#cdbfae}
+  .ph-h.sm{width:70%}
+  .ph-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center}
+  .ph-ring{width:66px;height:66px;border-radius:50%;border:6px solid var(--brown-soft);border-top-color:#e7ddd0;border-right-color:#e7ddd0;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800;color:var(--ink)}
+  .ph-cap{font-size:8px;font-weight:700;color:var(--brown-1)}
+  .ph-bar{width:82%;height:6px;border-radius:999px;background:#e2d7c8;overflow:hidden}
+  .ph-bar i{display:block;width:48%;height:100%;background:var(--brown-1);border-radius:999px}
+  .ph-spin{width:26px;height:26px;border-radius:50%;border:3px solid #e2d7c8;border-top-color:var(--brown-1)}
+  .ph-scale{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:3px}
+  .ph-scale span{height:19px;border-radius:5px;background:#fff;border:1px solid #e6ddd3;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:var(--brown-1)}
+  .ph-scale span.sel{background:var(--brown-1);color:#fff;border-color:var(--brown-1)}
+  .ph-field{height:15px;background:#fff;border:1px solid #e6ddd3;border-radius:6px}
+  .ph-video{flex:1;border-radius:10px;background:#1c1712;display:flex;align-items:center;justify-content:center;min-height:96px}
+  .ph-video svg{width:22px;height:22px;color:#fff}
+  .ph-buy{background:#fff;border:1px solid #e6ddd3;border-radius:12px;padding:11px 9px;display:flex;flex-direction:column;gap:6px;align-items:center;width:100%}
+  .ph-logo{font-size:8px;font-weight:800;letter-spacing:1px;color:var(--brown-1)}
+  .ph-old{font-size:7px;color:var(--muted);text-decoration:line-through}
+  .ph-price{font-size:20px;font-weight:800;color:var(--ink);line-height:1}
+  .ph-thumbs{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:3px}
+  .ph-thumb{height:34px;border-radius:6px;background:#e2d7c8 center/cover no-repeat}
 
   /* Gráficos */
   .charts2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
@@ -97,8 +129,6 @@
   .loading{color:var(--muted);text-align:center;padding:40px}
 
   @media(max-width:640px){
-    .frow{grid-template-columns:120px 1fr;gap:8px}
-    .fname{font-size:12px}
     th:nth-child(3),td:nth-child(3){display:none}
     .wrap{padding:20px 14px 50px}
     .top{padding:0 14px}
@@ -143,14 +173,6 @@
       <div class="card">
         <h2>Funil do quiz</h2>
         <div class="funnel" id="funnel"><div class="loading">Carregando...</div></div>
-      </div>
-      <div class="card">
-        <h2>Visitas por dia</h2>
-        <div class="chart" id="chartVisits"></div>
-      </div>
-      <div class="charts2">
-        <div class="card"><h2>Perfil dos leads</h2><div class="chart" id="chartPerfil"></div></div>
-        <div class="card"><h2>Beauty Score dos leads</h2><div class="chart" id="chartScore"></div></div>
       </div>
     </div>
 
@@ -220,21 +242,21 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
 
 /* ===== ANALYTICS / FUNIL ===== */
 const FUNNEL=[
-  {key:'Visitou o quiz', f:e=>e.event==='quiz_view'},
-  {key:'Iniciou', f:e=>e.event==='quiz_start'},
-  {key:'P1 · Área', f:e=>e.event==='quiz_step'&&e.step==='area'},
-  {key:'P2 · Dor', f:e=>e.event==='quiz_step'&&e.step==='dor'},
-  {key:'P3 · WhatsApp', f:e=>e.event==='quiz_step'&&e.step==='whats'},
-  {key:'P4 · Pós-envio', f:e=>e.event==='quiz_step'&&e.step==='pos'},
-  {key:'P5 · Preço', f:e=>e.event==='quiz_step'&&e.step==='preco'},
-  {key:'P6 · Materiais', f:e=>e.event==='quiz_step'&&e.step==='materiais'},
-  {key:'P7 · Transformação', f:e=>e.event==='quiz_step'&&e.step==='transf'},
-  {key:'P8 · Nota', f:e=>e.event==='quiz_step'&&e.step==='auto'},
-  {key:'Concluiu', f:e=>e.event==='quiz_complete'},
-  {key:'Viu o resultado', f:e=>e.event==='quiz_result_view'},
-  {key:'Virou lead', f:e=>e.event==='lead_capturado'},
-  {key:'Clicou na oferta', f:e=>e.event==='offer_cta_click'},
-  {key:'Foi pro checkout', f:e=>e.event==='checkout_click'},
+  {key:'Visitou o quiz', view:'hero', f:e=>e.event==='quiz_view'},
+  {key:'Iniciou', view:'hero', f:e=>e.event==='quiz_start'},
+  {key:'P1 · Área', view:'q', t:'Qual é a sua principal área de atuação?', n:5, f:e=>e.event==='quiz_step'&&e.step==='area'},
+  {key:'P2 · Dor', view:'q', t:'Hoje, qual situação mais acontece com você?', n:5, f:e=>e.event==='quiz_step'&&e.step==='dor'},
+  {key:'P3 · WhatsApp', view:'q', t:'Quando a cliente chama no WhatsApp, como você apresenta?', n:5, f:e=>e.event==='quiz_step'&&e.step==='whats'},
+  {key:'P4 · Pós-envio', view:'q', t:'O que acontece depois que você envia as informações?', n:5, f:e=>e.event==='quiz_step'&&e.step==='pos'},
+  {key:'P5 · Preço', view:'q', t:'Quando a cliente diz "Está caro", o que você pensa?', n:5, f:e=>e.event==='quiz_step'&&e.step==='preco'},
+  {key:'P6 · Materiais', view:'mat', t:'Quais destes materiais você possui hoje?', f:e=>e.event==='quiz_step'&&e.step==='materiais'},
+  {key:'P7 · Transformação', view:'q', t:'Se transmitisse mais profissionalismo, o que mudaria?', n:5, f:e=>e.event==='quiz_step'&&e.step==='transf'},
+  {key:'P8 · Nota', view:'scale', t:'De 1 a 10, quanto suas clientes enxergam o seu valor?', f:e=>e.event==='quiz_step'&&e.step==='auto'},
+  {key:'Concluiu', view:'loading', f:e=>e.event==='quiz_complete'},
+  {key:'Viu o resultado', view:'result', f:e=>e.event==='quiz_result_view'},
+  {key:'Virou lead', view:'lead', f:e=>e.event==='lead_capturado'},
+  {key:'Clicou na oferta', view:'video', f:e=>e.event==='offer_cta_click'},
+  {key:'Foi pro checkout', view:'checkout', f:e=>e.event==='checkout_click'},
 ];
 
 async function loadAnalytics(){
@@ -261,60 +283,54 @@ async function loadAnalytics(){
   ].map(([l,n])=>`<div class="kpi"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
 
   const base = counts[0]||visitors||1;
-  $('#funnel').innerHTML = FUNNEL.map((node,i)=>{
+  const arrow = '<svg width="30" height="14" viewBox="0 0 30 14" fill="none"><path d="M0 7h23" stroke="currentColor" stroke-width="2"/><path d="M21 2l7 5-7 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const cols = FUNNEL.map((node,i)=>{
     const c=counts[i];
     const pct = base? Math.round(c/base*100):0;
-    const w = Math.max(2, Math.round(c/top*100));
-    const drop = i>0 ? counts[i-1]-c : 0;
-    const dropTxt = i>0 && counts[i-1]>0 ? ` <span class="drop">−${Math.round(drop/counts[i-1]*100)}%</span>` : '';
-    return `<div class="frow"><div class="fname">${node.key}${dropTxt}</div>
-      <div class="fbarwrap"><div class="fbar" style="width:${w}%"></div>
-      <div class="fmeta"><span class="c">${c}</span><span class="p">${pct}%</span></div></div></div>`;
-  }).join('');
-
-  // Visitas por dia (montanha)
-  const byDay={};
-  events.forEach(e=>{ if(e.event==='quiz_view'&&e.created_at){ const d=e.created_at.slice(0,10); byDay[d]=(byDay[d]||0)+1; } });
-  const areaData=Object.keys(byDay).sort().map(d=>({label:d.slice(8,10)+'/'+d.slice(5,7), value:byDay[d]}));
-  $('#chartVisits').innerHTML = svgArea(areaData);
-
-  // Perfil dos leads (barras horizontais)
-  const perfis=['Apresentação improvisada','Valor pouco percebido','Profissional em crescimento','Marca em evolução'];
-  $('#chartPerfil').innerHTML = hBars(perfis.map(p=>({label:p, value:leads.filter(l=>l.perfil===p).length})));
-
-  // Beauty Score por faixa (barras)
-  const faixas=[['0–35',0,35],['36–60',36,60],['61–80',61,80],['81–100',81,100]];
-  $('#chartScore').innerHTML = svgBars(faixas.map(([lb,a,b])=>({label:lb, value:leads.filter(l=>l.beauty_score!=null&&l.beauty_score>=a&&l.beauty_score<=b).length})));
+    const dropTxt = i>0 && counts[i-1]>0 && c<counts[i-1] ? `<span class="dp">−${Math.round((counts[i-1]-c)/counts[i-1]*100)}%</span>` : '';
+    return `<div class="fnl-col">
+      <div class="phone"><div class="scr">${phScreen(node)}</div></div>
+      <div class="fnl-meta">
+        <div class="num">${c}${dropTxt}</div>
+        <div class="pct">${pct}%</div>
+        <div class="nm">${esc(node.key)}</div>
+      </div>
+    </div>`;
+  });
+  $('#funnel').innerHTML = `<div class="fnl-track">${cols.join('<div class="fnl-link">'+arrow+'</div>')}</div>`;
 }
 
-/* ===== Gráficos (SVG, sem libs) ===== */
-function svgArea(data){
-  if(!data.length) return '<div class="empty">Sem dados ainda.</div>';
-  const W=680,H=210,pl=34,pr=14,pt=14,pb=30, max=Math.max(1,...data.map(d=>d.value));
-  const iw=W-pl-pr, ih=H-pt-pb;
-  const xf=i=>pl+(data.length===1?iw/2:i*iw/(data.length-1)), yf=v=>pt+ih-(v/max*ih);
-  const pts=data.map((d,i)=>[xf(i),yf(d.value)]);
-  const line=pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
-  const area=`${xf(0)},${pt+ih} `+line+` ${xf(data.length-1)},${pt+ih}`;
-  let grid=''; [0,.5,1].forEach(t=>{ const y=pt+ih-t*ih; grid+=`<line x1="${pl}" y1="${y}" x2="${W-pr}" y2="${y}" stroke="#efe9e2"/><text x="${pl-6}" y="${y+4}" text-anchor="end" font-size="11" fill="#8a7d74">${Math.round(max*t)}</text>`; });
-  let xl=''; const idxs=data.length<=7?data.map((_,i)=>i):[0,Math.floor(data.length/2),data.length-1];
-  idxs.forEach(i=>{ xl+=`<text x="${xf(i)}" y="${H-8}" text-anchor="middle" font-size="11" fill="#8a7d74">${data[i].label}</text>`; });
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block"><defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a97b4f" stop-opacity=".38"/><stop offset="1" stop-color="#a97b4f" stop-opacity="0"/></linearGradient></defs>${grid}<polygon points="${area}" fill="url(#ga)"/><polyline points="${line}" fill="none" stroke="#7a5230" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>${pts.map(p=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3" fill="#7a5230"/>`).join('')}${xl}</svg>`;
-}
-function hBars(data){
-  if(!data.length||data.every(d=>!d.value)) return '<div class="empty">Sem leads ainda.</div>';
-  const max=Math.max(1,...data.map(d=>d.value));
-  return '<div class="hbars">'+data.map(d=>`<div class="hbar"><div class="hlbl">${esc(d.label)}</div><div class="htrack"><div class="hfill" style="width:${Math.max(2,Math.round(d.value/max*100))}%"></div><span class="hval">${d.value}</span></div></div>`).join('')+'</div>';
-}
-function svgBars(data){
-  if(!data.length||data.every(d=>!d.value)) return '<div class="empty">Sem leads ainda.</div>';
-  const W=680,H=210,pl=16,pr=16,pt=20,pb=40, max=Math.max(1,...data.map(d=>d.value));
-  const iw=W-pl-pr, ih=H-pt-pb, gap=iw/data.length, bw=Math.min(90,gap*.6);
-  let out=''; data.forEach((d,i)=>{ const x=pl+gap*i+gap/2, h=d.value/max*ih, y=pt+ih-h;
-    out+=`<rect x="${(x-bw/2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1,h).toFixed(1)}" rx="6" fill="#7a5230"/>`;
-    out+=`<text x="${x}" y="${(y-7).toFixed(1)}" text-anchor="middle" font-size="14" font-weight="700" fill="#2b2320">${d.value}</text>`;
-    out+=`<text x="${x}" y="${H-14}" text-anchor="middle" font-size="12" fill="#8a7d74">${esc(d.label)}</text>`; });
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">${out}</svg>`;
+/* Mini-tela do quiz (9:16) para cada etapa do funil */
+function phScreen(node){
+  const play='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+  const ops=n=>{ let o=''; for(let i=0;i<n;i++) o+=`<div class="ph-op${i===1?' sel':''}"></div>`; return `<div class="ph-ops">${o}</div>`; };
+  switch(node.view){
+    case 'hero':
+      return `<div class="ph-hero-img"></div><div class="ph-h"></div><div class="ph-h sm"></div><div class="ph-btn"></div>`;
+    case 'q':
+      return `<div class="ph-t">${esc(node.t||'')}</div>${ops(node.n||5)}`;
+    case 'mat':
+      return `<div class="ph-t">${esc(node.t||'')}</div><div class="ph-thumbs">
+        <div class="ph-thumb" style="background-image:url('../colecao-1.png')"></div>
+        <div class="ph-thumb" style="background-image:url('../colecao-5.png')"></div>
+        <div class="ph-thumb" style="background-image:url('../colecao-8.png')"></div>
+        <div class="ph-thumb" style="background-image:url('../colecao-10.png')"></div>
+      </div>`;
+    case 'scale':
+      return `<div class="ph-t">${esc(node.t||'')}</div><div class="ph-scale">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<span class="${n===7?'sel':''}">${n}</span>`).join('')}</div>`;
+    case 'loading':
+      return `<div class="ph-center"><div class="ph-spin"></div><div class="ph-cap">Calculando o seu<br>Beauty Score</div><div class="ph-bar"><i></i></div></div>`;
+    case 'result':
+      return `<div class="ph-center"><div class="ph-ring">72</div><div class="ph-cap">O seu Beauty Score</div><div class="ph-op" style="width:90%"></div><div class="ph-op" style="width:90%"></div></div>`;
+    case 'lead':
+      return `<div class="ph-t">Falta pouco para o seu Plano Beauty</div><div class="ph-field"></div><div class="ph-field"></div><div class="ph-field"></div><div class="ph-btn"></div>`;
+    case 'video':
+      return `<div class="ph-t">Existe uma forma simples de resolver isso</div><div class="ph-video">${play}</div><div class="ph-btn"></div>`;
+    case 'checkout':
+      return `<div class="ph-center"><div class="ph-buy"><div class="ph-logo">COLEÇÃO BEAUTY</div><div class="ph-old">R$ 197,00</div><div class="ph-price">R$ 47</div><div class="ph-btn" style="width:100%"></div></div></div>`;
+    default:
+      return '';
+  }
 }
 
 /* ===== LEADS ===== */
