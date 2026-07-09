@@ -524,12 +524,19 @@ const SUPA_URL='https://knqfiqyvpglyfabsmmlm.supabase.co';
 const SUPA_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtucWZpcXl2cGdseWZhYnNtbWxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NDgxMzIsImV4cCI6MjA5OTEyNDEzMn0.DQfVd2XMpSjqkCyuX4SmIxNzMARjr9jFh0boTt2bZTI';
 const SUPA_HEADERS={'Content-Type':'application/json','apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON,'Prefer':'return=minimal'};
 
-// visitante único (id no localStorage)
+// visitante único (novo modelo de id — chave v3, ignora ids antigos de qualquer aparelho)
+function novoId(){
+  if(window.crypto&&crypto.randomUUID) return crypto.randomUUID();
+  if(window.crypto&&crypto.getRandomValues){ const a=new Uint8Array(16); crypto.getRandomValues(a); return Array.from(a,b=>b.toString(16).padStart(2,'0')).join(''); }
+  return 'v'+Date.now()+Math.random().toString(36).slice(2);
+}
 let VISITOR_ID, VISITOR_NEW=false;
 try{
-  VISITOR_ID=localStorage.getItem('bq_vid');
-  if(!VISITOR_ID){ VISITOR_ID=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():('v'+Date.now()+Math.random().toString(36).slice(2)); localStorage.setItem('bq_vid',VISITOR_ID); VISITOR_NEW=true; }
-}catch(e){ VISITOR_ID='v'+Date.now(); }
+  // limpa a chave antiga pra não sobrar id de versões anteriores
+  localStorage.removeItem('bq_vid');
+  VISITOR_ID=localStorage.getItem('bq_vid_v3');
+  if(!VISITOR_ID){ VISITOR_ID=novoId(); localStorage.setItem('bq_vid_v3',VISITOR_ID); VISITOR_NEW=true; }
+}catch(e){ VISITOR_ID=novoId(); }
 
 function logEvent(ev,step){
   try{ fetch(SUPA_URL+'/rest/v1/events',{method:'POST',headers:SUPA_HEADERS,body:JSON.stringify({visitor_id:VISITOR_ID,event:ev,step:step||null}),keepalive:true}).catch(()=>{}); }catch(e){}
