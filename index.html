@@ -426,9 +426,7 @@
     <div class="video-narrow">
       <h2>Existe uma forma simples de resolver isso</h2>
       <p class="sub">A Coleção Beauty é uma coleção com mais de 20 materiais prontos e editáveis para você transmitir mais valor, vender melhor pelo WhatsApp e apresentar seus serviços de forma muito mais profissional. Assista abaixo para entender como funciona.</p>
-      <div class="vsl-box">
-        <vturb-smartplayer id="vid-6a4fe712b64d075550452eaa" style="display:block;margin:0 auto;width:100%;"><div class="vturb-player-placeholder" style="position:relative;width:100%;padding:56.25% 0 0;z-index:0;background-color:black;"></div></vturb-smartplayer>
-      </div>
+      <div class="vsl-box" id="vslBox"></div>
       <div class="btn-row" style="max-width:520px;margin-left:auto;margin-right:auto">
         <button class="btn full" id="videoCta">Quero conhecer a Coleção Beauty</button>
       </div>
@@ -799,18 +797,14 @@ function render(){
   if(el.getAttribute('data-loading')==='parcial') runParcial(el);
   if(el.getAttribute('data-loading')==='final') runFinal(el);
   if(el.hasAttribute('data-result')) preencheResultado();
-  if(el.hasAttribute('data-video')){ if(vslLoaded) playVSL(); else loadVSL(); } else stopVSL();
+  if(el.hasAttribute('data-video')) mountVSL(); else unmountVSL();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 // Carrega o player da VSL SÓ quando o usuário chega na tela do vídeo (não antes).
-let vslLoaded=false;
-function loadVSL(){
-  if(vslLoaded) return; vslLoaded=true;
-  const s=document.createElement('script');
-  s.src='https://scripts.converteai.net/2fe3fa7a-4b6e-44f7-be18-0c3cce42c4c0/players/6a4fe712b64d075550452eaa/v4/player.js';
-  s.async=true; document.head.appendChild(s);
-}
-// Pausa o vídeo ao sair da tela dele (varre também shadow DOM, onde o vturb coloca o <video>).
+// VSL: montar ao chegar / desmontar ao sair (remove o player do DOM = para de vez,
+// mesmo com shadow DOM fechado ou iframe interno). Ao voltar, recria e toca de novo.
+const PLAYER_HTML='<vturb-smartplayer id="vid-6a4fe712b64d075550452eaa" style="display:block;margin:0 auto;width:100%;"><div class="vturb-player-placeholder" style="position:relative;width:100%;padding:56.25% 0 0;z-index:0;background-color:black;"></div></vturb-smartplayer>';
+let vslScriptLoaded=false;
 function coletaMidia(root){
   let list=[];
   try{
@@ -819,11 +813,21 @@ function coletaMidia(root){
   }catch(e){}
   return list;
 }
-function stopVSL(){
-  try{ coletaMidia(document).forEach(m=>{ try{ m.pause(); m.muted=true; }catch(e){} }); }catch(e){}
+function mountVSL(){
+  const box=document.getElementById('vslBox'); if(!box) return;
+  if(box.querySelector('vturb-smartplayer')) return;       // já montado, deixa tocando
+  box.innerHTML=PLAYER_HTML;
+  if(!vslScriptLoaded){
+    vslScriptLoaded=true;
+    const s=document.createElement('script');
+    s.src='https://scripts.converteai.net/2fe3fa7a-4b6e-44f7-be18-0c3cce42c4c0/players/6a4fe712b64d075550452eaa/v4/player.js';
+    s.async=true; document.head.appendChild(s);
+  }
 }
-function playVSL(){
-  try{ coletaMidia(document).forEach(m=>{ try{ m.muted=false; const p=m.play(); if(p&&p.catch)p.catch(()=>{}); }catch(e){} }); }catch(e){}
+function unmountVSL(){
+  const box=document.getElementById('vslBox');
+  if(box && box.innerHTML) box.innerHTML='';               // remove o player -> para na hora
+  try{ coletaMidia(document).forEach(m=>{ try{ m.pause(); m.muted=true; }catch(e){} }); }catch(e){} // reforço
 }
 function goVideo(){ const n=steps.findIndex(s=>s.hasAttribute('data-video')); if(n>=0) go(n); }
 function go(n){ if(n>=0 && n<steps.length){ i=n; render(); } }
