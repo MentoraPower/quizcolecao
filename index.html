@@ -802,10 +802,17 @@ function loadVSL(){
   s.src='https://scripts.converteai.net/2fe3fa7a-4b6e-44f7-be18-0c3cce42c4c0/players/6a4fe712b64d075550452eaa/v4/player.js';
   s.async=true; document.head.appendChild(s);
 }
-// Pausa o vídeo ao sair da tela dele.
+// Pausa o vídeo ao sair da tela dele (varre também shadow DOM, onde o vturb coloca o <video>).
+function coletaMidia(root){
+  let list=[];
+  try{
+    if(root.querySelectorAll) root.querySelectorAll('video,audio').forEach(m=>list.push(m));
+    if(root.querySelectorAll) root.querySelectorAll('*').forEach(el=>{ if(el.shadowRoot) list=list.concat(coletaMidia(el.shadowRoot)); });
+  }catch(e){}
+  return list;
+}
 function stopVSL(){
-  try{ document.querySelectorAll('#vid-6a4fe712b64d075550452eaa video, #vid-6a4fe712b64d075550452eaa audio').forEach(m=>{ try{ m.pause(); }catch(e){} });
-       document.querySelectorAll('video,audio').forEach(m=>{ try{ if(!m.paused) m.pause(); }catch(e){} }); }catch(e){}
+  try{ coletaMidia(document).forEach(m=>{ try{ m.pause(); }catch(e){} }); }catch(e){}
 }
 function go(n){ if(n>=0 && n<steps.length){ i=n; render(); } }
 function next(){
