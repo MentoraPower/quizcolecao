@@ -532,10 +532,10 @@ function novoId(){
 }
 let VISITOR_ID, VISITOR_NEW=false;
 try{
-  // limpa a chave antiga pra não sobrar id de versões anteriores
-  localStorage.removeItem('bq_vid');
-  VISITOR_ID=localStorage.getItem('bq_vid_v3');
-  if(!VISITOR_ID){ VISITOR_ID=novoId(); localStorage.setItem('bq_vid_v3',VISITOR_ID); VISITOR_NEW=true; }
+  // limpa chaves antigas pra não sobrar id de versões anteriores
+  localStorage.removeItem('bq_vid'); localStorage.removeItem('bq_vid_v3');
+  VISITOR_ID=localStorage.getItem('bq_vid_v4');
+  if(!VISITOR_ID){ VISITOR_ID=novoId(); localStorage.setItem('bq_vid_v4',VISITOR_ID); VISITOR_NEW=true; }
 }catch(e){ VISITOR_ID=novoId(); }
 
 function logEvent(ev,step){
