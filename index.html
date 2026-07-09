@@ -804,7 +804,6 @@ function render(){
 // VSL: montar ao chegar / desmontar ao sair (remove o player do DOM = para de vez,
 // mesmo com shadow DOM fechado ou iframe interno). Ao voltar, recria e toca de novo.
 const PLAYER_HTML='<vturb-smartplayer id="vid-6a4fe712b64d075550452eaa" style="display:block;margin:0 auto;width:100%;"><div class="vturb-player-placeholder" style="position:relative;width:100%;padding:56.25% 0 0;z-index:0;background-color:black;"></div></vturb-smartplayer>';
-let vslScriptLoaded=false;
 function coletaMidia(root){
   let list=[];
   try{
@@ -817,12 +816,11 @@ function mountVSL(){
   const box=document.getElementById('vslBox'); if(!box) return;
   if(box.querySelector('vturb-smartplayer')) return;       // já montado, deixa tocando
   box.innerHTML=PLAYER_HTML;
-  if(!vslScriptLoaded){
-    vslScriptLoaded=true;
-    const s=document.createElement('script');
-    s.src='https://scripts.converteai.net/2fe3fa7a-4b6e-44f7-be18-0c3cce42c4c0/players/6a4fe712b64d075550452eaa/v4/player.js';
-    s.async=true; document.head.appendChild(s);
-  }
+  // (re)injeta o script do player pra inicializar o elemento recém-criado (aparece e toca)
+  const prev=document.getElementById('vslScript'); if(prev) prev.remove();
+  const s=document.createElement('script'); s.id='vslScript';
+  s.src='https://scripts.converteai.net/2fe3fa7a-4b6e-44f7-be18-0c3cce42c4c0/players/6a4fe712b64d075550452eaa/v4/player.js';
+  s.async=true; document.head.appendChild(s);
 }
 function unmountVSL(){
   const box=document.getElementById('vslBox');
