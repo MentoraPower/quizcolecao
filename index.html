@@ -259,7 +259,6 @@
 
   <!-- ===== ABERTURA ===== -->
   <div class="step active" data-step data-open>
-    <div class="open-name">Diagnóstico Builder</div>
     <div class="open-badge">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
       Leva menos de 2 minutos
@@ -498,7 +497,7 @@ let i=0;
 steps.forEach(step=>{
   const id=step.getAttribute('data-q'); if(!id) return;
   const c=CFG[id];
-  let html='<div class="qcount">Pergunta '+c.n+' de '+TOTAL_Q+' · Falta pouco para o seu resultado</div><h2>'+c.titulo+'</h2>';
+  let html='<h2>'+c.titulo+'</h2>';
   if(c.sub) html+='<p class="sub">'+c.sub+'</p>';
   if(c.tipo==='single'){
     html+='<div class="options">'+c.opts.map((o,k)=>'<button class="opt" data-oi="'+k+'"><span class="key">'+KEYS[k]+'</span>'+o[0]+checkSvg+'</button>').join('')+'</div>';
