@@ -83,8 +83,8 @@
   .btn-row{margin-top:28px}
   .btn-ghost{background:none;color:var(--brown-1);border:1.5px solid var(--line);border-radius:999px;padding:14px 24px;font-weight:600;cursor:pointer}
 
-  /* Hero da abertura — MOBILE: imagem no topo / conteúdo abaixo */
-  .hero-img{width:100vw;margin-left:calc(-50vw + 50%);margin-top:-64px;aspect-ratio:1080/720;
+  /* Hero da abertura — MOBILE/TABLET: imagem no topo / conteúdo abaixo */
+  .hero-img{width:100vw;margin-left:calc(-50vw + 50%);margin-top:-76px;aspect-ratio:1080/720;
     background:url('hero-mobile.webp') center top/cover no-repeat}
   .open-content{margin-top:8px}
   .oc-inner{width:100%}
@@ -92,21 +92,22 @@
   @media(min-width:900px){
     .step[data-open]{margin-top:-76px}                 /* remove a margem no topo */
     .hero-wrap{width:100vw;margin-left:calc(-50vw + 50%);display:flex;align-items:flex-start;
-      min-height:min(41vw,790px);
-      background:#F0ECE6 url('hero-desktop.webp') no-repeat top center;background-size:min(100%,1920px) auto}
+      min-height:41vw;                                 /* casa com a altura da imagem (notebook) */
+      background:#F0ECE6 url('hero-desktop.webp') no-repeat top center;background-size:100% auto}
     .hero-img{display:none}
-    .open-content{margin:0 auto;width:100%;max-width:1240px;padding:clamp(34px,4.5vw,80px) 48px 48px}
-    .oc-inner{max-width:clamp(400px,32vw,480px)}
+    /* conteúdo alinhado à esquerda, dentro do espaço claro, sem passar por cima dela */
+    .open-content{width:100%;margin:0;padding:clamp(34px,4.5vw,90px) 48px 40px clamp(40px,7vw,300px)}
+    .oc-inner{max-width:min(34vw,620px)}
     .oc-inner .open-badge{font-size:clamp(12px,.95vw,14px);margin-bottom:clamp(14px,1.4vw,22px)}
-    .oc-inner h1{font-size:clamp(24px,2.25vw,36px);line-height:1.22;margin-bottom:clamp(12px,1.2vw,18px)}
-    .oc-inner .open-list li{font-size:clamp(14px,1.05vw,17px);padding:clamp(5px,.5vw,9px) 0}
-    .oc-inner .open-list{margin:clamp(16px,1.6vw,24px) 0 clamp(20px,2vw,30px)}
-    .oc-inner .btn.full{width:auto;padding:clamp(13px,1vw,16px) clamp(26px,2vw,34px);font-size:clamp(15px,1.05vw,17px)}
+    .oc-inner h1{font-size:clamp(25px,2.4vw,40px);line-height:1.2;margin-bottom:clamp(12px,1.2vw,20px)}
+    .oc-inner .open-list li{font-size:clamp(14px,1.05vw,18px);padding:clamp(5px,.5vw,9px) 0}
+    .oc-inner .open-list{margin:clamp(16px,1.6vw,26px) 0 clamp(20px,2vw,32px)}
+    .oc-inner .btn.full{width:auto;padding:clamp(13px,1vw,17px) clamp(26px,2vw,36px);font-size:clamp(15px,1.05vw,18px)}
     .oc-inner .btn-row{margin-top:0}
   }
-  /* Ultrawide: não deixa o hero gigante */
+  /* Ultrawide: imagem própria (mais larga/baixa) */
   @media(min-width:1700px){
-    .hero-wrap{min-height:700px}
+    .hero-wrap{background-image:url('hero-ultrawide.webp');min-height:24vw}
   }
 
   /* Abertura */
@@ -248,6 +249,7 @@
   /* ================= MOBILE ================= */
   @media (max-width:560px){
     .stage{padding:64px 0 44px}
+    .hero-img{margin-top:-64px}
     .wrap,.wrap.wide{padding:0 1.5em}
     h1{font-size:27px}
     h2{font-size:23px}
