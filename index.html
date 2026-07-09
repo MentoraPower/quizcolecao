@@ -3,285 +3,241 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quiz, Coleção Beauty</title>
+<title>Diagnóstico Builder — Coleção Beauty</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --brown-1:#7a5230;
-    --brown-2:#5a3a1e;
-    --brown-soft:#a97b4f;
-    --ink:#2b2320;
-    --muted:#8a7d74;
-    --line:#e7e0da;
-    --line-soft:#f0ebe6;
-    --bg:#ffffff;
-    --key-bg:#f7f3ef;
+    --brown-1:#7a5230; --brown-2:#5a3a1e; --brown-soft:#a97b4f;
+    --ink:#2b2320; --muted:#8a7d74; --line:#e7e0da; --line-soft:#f0ebe6;
+    --bg:#fdfbf8; --key-bg:#f7f3ef;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   [hidden]{display:none!important}
   html,body{height:100%}
-  body{
-    font-family:'Instrument Sans','Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;
-    background:var(--bg);color:var(--ink);
-    display:flex;flex-direction:column;min-height:100vh;
-    -webkit-font-smoothing:antialiased;
-  }
+  body{font-family:'Instrument Sans','Helvetica Neue',Helvetica,Arial,system-ui,sans-serif;
+    background:var(--bg);color:var(--ink);display:flex;flex-direction:column;min-height:100vh;-webkit-font-smoothing:antialiased}
+  input,textarea,select,button{font-family:inherit}
+  input,textarea,select{font-size:16px}
 
-  /* Barra de progresso topo (estilo Typeform) */
+  /* Barra de progresso topo */
   .progress{position:fixed;top:0;left:0;right:0;height:5px;background:var(--line-soft);z-index:10}
-  .progress > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--brown-soft),var(--brown-1));transition:width .45s cubic-bezier(.4,0,.2,1)}
+  .progress > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--brown-soft),var(--brown-1));transition:width .4s ease}
 
-  .stage{flex:1;display:flex;justify-content:center;align-items:flex-start;padding:72px 24px 48px}
+  /* Voltar (topo esquerdo, só em perguntas) */
+  .back{position:fixed;top:16px;left:16px;z-index:20;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--line);
+    background:#fff;color:var(--brown-1);display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .back svg{width:20px;height:20px}
+
+  .stage{flex:1;display:flex;justify-content:center;align-items:flex-start;padding:76px 24px 56px}
   .wrap{width:100%;max-width:600px;transition:max-width .3s ease}
   .wrap.wide{max-width:1080px}
 
-  /* Steps */
   .step{display:none}
-  .step.active{display:block;animation:slide .5s cubic-bezier(.2,.7,.2,1)}
-  @keyframes slide{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+  .step.active{display:block;animation:slide .45s cubic-bezier(.2,.7,.2,1)}
+  @keyframes slide{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
 
-  .qnum{display:inline-flex;align-items:center;gap:7px;color:var(--brown-1);font-size:14px;font-weight:600;margin-bottom:14px}
-  .qnum svg{width:13px;height:13px}
-  h2{font-size:28px;line-height:1.3;font-weight:700;letter-spacing:-.3px;margin-bottom:6px}
-  p.sub{color:var(--muted);font-size:16px;line-height:1.55;margin-top:8px;margin-bottom:6px}
+  .qcount{font-size:13px;font-weight:600;color:var(--brown-1);letter-spacing:.3px;margin-bottom:14px}
+  h1{font-size:32px;line-height:1.22;font-weight:700;letter-spacing:-.5px;margin-bottom:16px;text-wrap:balance}
+  h2{font-size:26px;line-height:1.3;font-weight:700;letter-spacing:-.3px;text-wrap:balance}
+  p.sub{color:var(--muted);font-size:16px;line-height:1.55;margin-top:10px}
 
-  .options{display:flex;flex-direction:column;gap:12px;margin-top:28px}
-  .opt{
-    display:flex;align-items:center;gap:14px;width:100%;text-align:left;cursor:pointer;
-    background:#fff;border:1.5px solid var(--line);border-radius:10px;
-    padding:15px 16px;font-size:17px;color:var(--ink);transition:.15s;
-  }
-  .opt:hover{border-color:var(--brown-1);background:#fbf8f5;transform:translateX(2px)}
-  .opt .key{
-    flex:none;width:28px;height:28px;border-radius:6px;background:var(--key-bg);
-    border:1px solid var(--line);color:var(--brown-1);font-size:14px;font-weight:700;
-    display:flex;align-items:center;justify-content:center;transition:.15s;
-  }
-  .opt:hover .key{background:var(--brown-1);color:#fff;border-color:var(--brown-1)}
+  /* Cards de opção (single) */
+  .options{display:flex;flex-direction:column;gap:11px;margin-top:26px}
+  .opt{display:flex;align-items:center;gap:14px;width:100%;text-align:left;cursor:pointer;background:#fff;
+    border:1.5px solid var(--line);border-radius:12px;padding:15px 16px;font-size:16.5px;color:var(--ink);transition:.15s}
+  .opt:hover{border-color:var(--brown-1);background:#fbf8f5}
+  .opt .key{flex:none;width:28px;height:28px;border-radius:7px;background:var(--key-bg);border:1px solid var(--line);
+    color:var(--brown-1);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:.15s}
+  .opt:hover .key,.opt.selected .key{background:var(--brown-1);color:#fff;border-color:var(--brown-1)}
   .opt .check{flex:none;width:20px;height:20px;margin-left:auto;opacity:0;transition:.15s;color:var(--brown-1)}
-  .opt:hover .check{opacity:1}
-  /* Opção selecionada (ao voltar) */
+  .opt:hover .check,.opt.selected .check{opacity:1}
   .opt.selected{border-color:var(--brown-1);background:#fbf5ef}
-  .opt.selected .key{background:var(--brown-1);color:#fff;border-color:var(--brown-1)}
-  .opt.selected .check{opacity:1}
-  /* Shake quando tenta avançar sem responder */
-  .options.shake{animation:shk .4s}
-  @keyframes shk{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
 
-  /* Navegação (setas ir/voltar) */
-  .nav{position:fixed;right:22px;bottom:22px;display:flex;gap:2px;z-index:20;border-radius:999px;overflow:hidden}
-  .nav-btn{width:46px;height:44px;border:0;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(135deg,var(--brown-soft),var(--brown-1));transition:.15s}
-  .nav-btn:hover{filter:brightness(1.08)}
-  .nav-btn svg{width:22px;height:22px}
-  .nav-btn.disabled{opacity:.4;pointer-events:none}
+  /* Múltipla escolha */
+  .opt.multi .box{flex:none;width:24px;height:24px;border-radius:7px;border:1.5px solid var(--line);background:#fff;
+    display:flex;align-items:center;justify-content:center;transition:.15s}
+  .opt.multi .box svg{width:16px;height:16px;color:#fff;opacity:0;transition:.15s}
+  .opt.multi.selected{border-color:var(--brown-1);background:#fbf5ef}
+  .opt.multi.selected .box{background:var(--brown-1);border-color:var(--brown-1)}
+  .opt.multi.selected .box svg{opacity:1}
 
-  /* Botões com gradiente marrom + ícone */
-  .btn{
-    display:inline-flex;align-items:center;justify-content:center;gap:10px;
-    border:0;border-radius:999px;cursor:pointer;padding:16px 30px;
-    font-size:17px;font-weight:700;color:#fff;font-family:inherit;
-    background:linear-gradient(135deg,var(--brown-soft),var(--brown-1) 55%,var(--brown-2));
-    transition:.18s;text-decoration:none;
-  }
-  .btn:hover{filter:brightness(1.06);transform:translateY(-2px)}
-  .btn:active{transform:translateY(0)}
-  .btn svg{width:19px;height:19px}
+  /* Escala 1 a 10 */
+  .scale{display:grid;grid-template-columns:repeat(10,1fr);gap:7px;margin-top:26px}
+  .scale button{aspect-ratio:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;font-size:16px;font-weight:700;
+    color:var(--ink);cursor:pointer;transition:.15s}
+  .scale button:hover{border-color:var(--brown-1)}
+  .scale button.selected{background:var(--brown-1);color:#fff;border-color:var(--brown-1)}
+  .scale-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-top:10px}
+
+  /* Botões */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;border-radius:999px;cursor:pointer;
+    padding:16px 30px;font-size:17px;font-weight:700;color:#fff;text-decoration:none;transition:.18s;
+    background:linear-gradient(135deg,var(--brown-soft),var(--brown-1) 55%,var(--brown-2))}
+  .btn:hover{filter:brightness(1.05);transform:translateY(-1px)}
   .btn.full{width:100%;padding:18px}
-  .btn-row{margin-top:30px}
-  .hint{color:var(--muted);font-size:13px;margin-top:12px;display:flex;align-items:center;gap:6px}
-  .hint svg{width:12px;height:12px}
+  .btn[disabled]{opacity:.45;pointer-events:none}
+  .btn-row{margin-top:28px}
+  .btn-ghost{background:none;color:var(--brown-1);border:1.5px solid var(--line);border-radius:999px;padding:14px 24px;font-weight:600;cursor:pointer}
 
-  /* Vídeos */
-  .video-box{
-    position:relative;width:100%;aspect-ratio:16/9;background:#f3efeb;border-radius:14px;
-    overflow:hidden;border:1.5px solid var(--line);margin:24px 0;
-    display:flex;align-items:center;justify-content:center;text-align:center;
-  }
-  .video-box iframe{width:100%;height:100%;border:0}
-  .video-ph{color:var(--muted);font-size:14px;padding:20px;line-height:1.6}
-  .video-ph .play-ico{width:44px;height:44px;color:var(--brown-soft);display:block;margin:0 auto 12px}
-  .video-ph b{color:var(--brown-1);display:block;margin-bottom:6px;font-size:15px}
+  /* Abertura */
+  .open-badge{display:inline-flex;align-items:center;gap:7px;background:var(--key-bg);border:1px solid var(--line);
+    border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600;color:var(--brown-1);margin-bottom:20px}
+  .open-badge svg{width:15px;height:15px}
+  .open-name{font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--brown-soft);font-weight:700;margin-bottom:14px}
+  .open-list{list-style:none;margin:22px 0 28px}
+  .open-list li{display:flex;align-items:center;gap:11px;font-size:16px;color:var(--ink);padding:8px 0}
+  .open-list li svg{flex:none;width:20px;height:20px;padding:3px;border-radius:50%;background:var(--key-bg);color:var(--brown-1)}
 
-  /* Autoridade */
-  .expert{background:linear-gradient(180deg,#fdfbf9,#fbf7f3);border:1.5px solid var(--line);border-radius:16px;padding:22px;margin-bottom:6px}
-  .expert-top{display:flex;align-items:center;gap:16px;padding-bottom:18px;margin-bottom:6px;border-bottom:1px solid var(--line-soft)}
-  .avatar{flex:none;width:64px;height:64px;border-radius:50%;overflow:hidden;background:var(--key-bg);border:2px solid #fff;box-shadow:0 4px 14px rgba(90,58,30,.16);display:flex;align-items:center;justify-content:center;color:var(--brown-soft)}
-  .avatar img{width:100%;height:100%;object-fit:cover}
-  .avatar svg{width:34px;height:34px}
-  .expert-id{min-width:0}
-  .expert-name{display:flex;align-items:center;gap:7px;font-size:21px;font-weight:700;color:var(--ink);line-height:1.1}
-  .expert-name .verified{width:20px;height:20px;flex:none;color:var(--brown-1)}
-  .expert .role{color:var(--brown-1);font-size:11.5px;letter-spacing:1px;text-transform:uppercase;font-weight:700;margin-top:5px}
-  .creds{list-style:none}
-  .creds li{color:var(--ink);font-size:15px;line-height:1.5;padding:9px 0 9px 28px;position:relative;border-top:1px solid var(--line-soft)}
-  .creds li:first-child{border-top:0}
-  .creds li svg{position:absolute;left:0;top:11px;width:16px;height:16px;color:var(--brown-soft)}
+  /* Loadings */
+  .load{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:56vh;text-align:center}
+  .load h2{margin-bottom:8px}
+  .load p{color:var(--muted);font-size:15.5px;line-height:1.5;max-width:420px}
+  .load-bar{width:240px;max-width:70%;height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin:24px 0 8px}
+  .load-bar > i{display:block;width:40%;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brown-soft),var(--brown-1));animation:ld 1.15s ease-in-out infinite}
+  @keyframes ld{0%{margin-left:-40%}100%{margin-left:100%}}
+  .load-msg{font-size:17px;font-weight:700;color:var(--ink);min-height:26px;transition:opacity .3s;margin-top:4px}
+  .checklist{list-style:none;margin-top:26px;text-align:left;width:100%;max-width:320px}
+  .checklist li{display:flex;align-items:center;gap:12px;padding:10px 0;color:var(--muted);font-size:15.5px;opacity:.35;transition:.35s}
+  .checklist li.done{opacity:1;color:var(--ink)}
+  .checklist li .ci{flex:none;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;transition:.35s}
+  .checklist li .ci svg{width:14px;height:14px;color:#fff;opacity:0;transition:.35s}
+  .checklist li.done .ci{background:var(--brown-1);border-color:var(--brown-1)}
+  .checklist li.done .ci svg{opacity:1}
+  .load-pct{font-size:44px;font-weight:800;color:var(--brown-1);margin-top:4px;letter-spacing:-1px}
 
-  /* Step largo (bônus + checkout) */
-  .step.wide{width:100%}
+  /* Resultado */
+  .result{text-align:center}
+  .score-kicker{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--brown-1);font-weight:700;margin-bottom:16px}
+  .score-ring{position:relative;width:160px;height:160px;margin:0 auto 10px}
+  .score-ring svg{transform:rotate(-90deg);width:160px;height:160px}
+  .score-ring circle{fill:none;stroke-width:12}
+  .score-ring .track{stroke:var(--line)}
+  .score-ring .fill{stroke:var(--brown-1);stroke-linecap:round;transition:stroke-dashoffset 1.3s cubic-bezier(.2,.7,.2,1)}
+  .score-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .score-num b{font-size:42px;font-weight:800;color:var(--ink);line-height:1}
+  .score-num small{font-size:13px;color:var(--muted);margin-top:2px}
+  .perfil{font-size:22px;font-weight:700;margin-top:6px}
+  .perfil-sub{color:var(--muted);font-size:16px;line-height:1.55;max-width:520px;margin:10px auto 0}
+  .res-block{text-align:left;max-width:560px;margin:30px auto 0}
+  .res-title{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--brown-1);font-weight:700;margin-bottom:12px}
+  .res-diag{font-size:17px;line-height:1.7;color:#4c4139}
+  .res-cards{display:grid;grid-template-columns:1fr;gap:10px;margin-top:6px}
+  .res-card{display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;font-size:15.5px;line-height:1.45}
+  .res-card .num{flex:none;width:26px;height:26px;border-radius:7px;background:var(--key-bg);color:var(--brown-1);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+  .res-card .ck{flex:none;width:22px;height:22px;border-radius:50%;background:var(--brown-1);color:#fff;display:flex;align-items:center;justify-content:center}
+  .res-card .ck svg{width:13px;height:13px}
+  .ponte{background:#fbf7f3;border:1.5px solid var(--line);border-radius:16px;padding:22px;margin:30px auto 0;max-width:560px;text-align:left}
+  .ponte b{display:block;font-size:16px;margin-bottom:6px}
+  .ponte p{color:var(--muted);font-size:15px;line-height:1.6}
 
-  /* Painel marrom (bônus / checkout) */
-  .brown-panel{background:linear-gradient(180deg,#6e4d31,#5a3d26);border-radius:24px;padding:44px 40px 48px;text-align:center;margin-top:22px}
-  .brown-panel:first-child{margin-top:0}
-  .panel-title{color:#fff;font-size:30px;font-weight:700;line-height:1.25;letter-spacing:-.3px;max-width:640px;margin:0 auto 12px}
-  .panel-sub{color:rgba(255,255,255,.7);font-size:16px;line-height:1.5;max-width:560px;margin:0 auto}
-
-  /* Grid de bônus */
-  .bonus-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:34px}
-  .bonus-card{background:#efe7dc;border-radius:18px;overflow:hidden;text-align:left;display:flex;flex-direction:column}
-  .bonus-img{padding:14px 14px 0}
-  .bonus-img img{display:block;width:100%;height:190px;object-fit:cover;border-radius:12px}
-  .bonus-body{padding:18px 20px 22px}
-  .bonus-body h4{font-size:19px;font-weight:600;color:#4a3320;margin-bottom:8px}
-  .bonus-body p{font-size:14.5px;line-height:1.5;color:#7a6a58}
-
-  /* Checkout */
-  .checkout-panel{padding-bottom:44px}
-  .mark{color:rgba(255,255,255,.85);margin:26px auto 0}
-  .mark svg{width:40px;height:40px;display:block;margin:0 auto}
-  .buy-card{background:#efe7dc;border-radius:22px;max-width:440px;margin:30px auto 0;padding:34px 30px 30px;text-align:center;position:relative}
-  .buy-logo{font-size:22px;font-weight:700;letter-spacing:2px;color:#4a3320;margin-bottom:18px}
-  .buy-logo u{text-decoration:none;border-bottom:2px solid var(--brown-soft);padding-bottom:2px}
-  .buy-lead{color:#8a7358;font-size:16px;line-height:1.4;max-width:280px;margin:0 auto 16px}
-  .buy-price{font-size:52px;font-weight:800;letter-spacing:-1px;color:#5a3d26;line-height:1;margin-bottom:14px}
-  .buy-inst{color:#8a7358;font-size:15px;margin-bottom:26px}
-  .buy-btn{width:100%;padding:19px;font-size:17px;border-radius:999px}
-  .buy-btn svg{width:18px;height:18px}
-  .trust{display:flex;justify-content:center;gap:14px;margin-top:26px}
-  .trust-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;color:#5a3d26}
-  .trust-item svg{width:26px;height:26px}
-  .trust-item span{font-size:12.5px;font-weight:600;line-height:1.25;text-align:center}
-  .buy-old{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
-  .buy-old s{color:#b09a80;font-size:16px}
-  .buy-badge{display:inline-block;background:#c0392b;color:#fff;font-size:12px;font-weight:800;letter-spacing:.5px;padding:4px 10px;border-radius:99px}
-
-  /* Barra vermelha fixa (tela final) */
-  .topbar{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:center;justify-content:center;gap:8px;
-    background:linear-gradient(90deg,#c0392b,#a93226);color:#fff;font-size:13.5px;font-weight:700;letter-spacing:.4px;
-    text-transform:uppercase;padding:9px 16px;animation:pulseBar 2s ease-in-out infinite}
-  .topbar svg{width:16px;height:16px;flex:none}
-  @keyframes pulseBar{0%,100%{opacity:1}50%{opacity:.82}}
-  body.has-topbar .progress{top:38px}
-  body.has-topbar .stage{padding-top:96px}
-
-  /* Diagnóstico (IA), tela "Criando diagnóstico" */
-  .diag-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;min-height:52vh;color:var(--brown-1)}
-  .diag-reassure{font-size:18px;font-weight:700;color:var(--ink);text-align:center;max-width:400px;line-height:1.4;min-height:26px;transition:opacity .3s}
-  .diag-label{font-size:14px;font-weight:600;letter-spacing:.3px;color:var(--muted)}
-  .diag-bar{width:240px;max-width:70%;height:6px;border-radius:99px;background:var(--line);overflow:hidden}
-  .diag-bar > i{display:block;width:40%;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brown-soft),var(--brown-1));animation:load 1.15s ease-in-out infinite}
-  @keyframes load{0%{margin-left:-40%}100%{margin-left:100%}}
-
-  /* Resultado do diagnóstico, limpo, espaçado, legível */
-  .diag-result{animation:slide .5s cubic-bezier(.2,.7,.2,1);max-width:600px;margin:0 auto;padding:6px 2px 0}
-  .diag-result h2{text-align:center;font-size:29px;line-height:1.28;letter-spacing:-.4px;margin:0 auto 22px;max-width:600px;
-    text-wrap:balance;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .diag-text{font-size:18px;line-height:1.75;color:#4c4139;text-align:center;max-width:560px;margin:0 auto 30px}
-  /* Aviso: temos a solução, é só preencher */
-  .diag-solve{max-width:540px;margin:26px auto 0;text-align:center;font-size:17px;line-height:1.55;color:var(--brown-1);font-weight:700}
-  .diag-points{list-style:none;margin:0 auto}
-  .diag-points li{display:flex;align-items:center;gap:14px;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px;font-size:16px;line-height:1.5;color:var(--ink)}
-  .diag-points li::before{content:"";flex:none;width:22px;height:22px;border-radius:50%;background:var(--brown-1);
-    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5L20 7'/%3E%3C/svg%3E") center/68% no-repeat;
-    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5L20 7'/%3E%3C/svg%3E") center/68% no-repeat}
-
-  /* Formulário de captura (card separado, com respiro) */
-  .lead-form{max-width:540px;margin:34px auto 0;background:#fbf7f3;border:1.5px solid var(--line);border-radius:20px;padding:28px 26px}
+  /* Formulário de lead */
+  .lead-form{max-width:540px;margin:26px auto 0}
   .lead-cta{font-size:16px;color:var(--ink);text-align:center;line-height:1.5;font-weight:600;margin:0 0 18px}
-  .lead-form input{width:100%;font-size:16px;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:15px 16px;margin-bottom:12px;font-family:inherit;-webkit-appearance:none;appearance:none}
+  .lead-form input{width:100%;font-size:16px;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:15px 16px;margin-bottom:12px;-webkit-appearance:none;appearance:none}
   .lead-form input:focus,.lead-form input:hover{outline:none;border-color:var(--line)}
   .lead-form input::placeholder{color:var(--muted)}
   .lead-form .btn{margin-top:10px}
-
-  /* Seletor de DDI com bandeiras SVG */
   .phone-field{position:relative;margin-bottom:12px}
   .phone-row{display:flex;gap:8px;align-items:stretch}
   .phone-row input{margin-bottom:0;flex:1;min-width:0}
-  .ddi-btn{flex:none;display:flex;align-items:center;gap:7px;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:0 12px;cursor:pointer;font-family:inherit;font-size:16px;color:var(--ink)}
+  .ddi-btn{flex:none;display:flex;align-items:center;gap:7px;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:0 12px;cursor:pointer;font-size:16px;color:var(--ink)}
   .ddi-btn:focus{outline:none}
   .ddi-btn .flag{width:26px;height:19px;object-fit:cover;border-radius:3px;display:block;background:var(--line)}
   .ddi-btn .chev{width:15px;height:15px;color:var(--muted);flex:none}
-  .ddi-panel{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:6;background:#fff;border:1.5px solid var(--line);border-radius:14px;box-shadow:0 14px 34px rgba(90,58,30,.16);padding:10px;max-height:300px;display:flex;flex-direction:column}
-  .ddi-search{width:100%;font-size:16px;color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:8px;font-family:inherit;-webkit-appearance:none;appearance:none}
+  .ddi-panel{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:6;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:10px;max-height:300px;display:flex;flex-direction:column}
+  .ddi-search{width:100%;font-size:16px;color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:8px;-webkit-appearance:none;appearance:none}
   .ddi-search:focus{outline:none;border-color:var(--brown-soft)}
   .ddi-list{overflow-y:auto;overscroll-behavior:contain}
-  .ddi-item{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:none;border:0;cursor:pointer;padding:10px 8px;border-radius:8px;font-family:inherit;font-size:15px;color:var(--ink)}
+  .ddi-item{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:none;border:0;cursor:pointer;padding:10px 8px;border-radius:8px;font-size:15px;color:var(--ink)}
   .ddi-item:hover{background:var(--key-bg)}
   .ddi-item .flag{width:24px;height:18px;object-fit:cover;border-radius:3px;flex:none;background:var(--line)}
   .ddi-item .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ddi-item .dc{color:var(--muted);font-size:14px;flex:none}
 
-  /* Vídeo centralizado no step largo */
+  /* Vídeo (VSL) */
   .video-narrow{max-width:600px;margin:0 auto}
-  .btn-row.narrow{max-width:520px;margin-left:auto;margin-right:auto}
-  .btn-row.after-video{margin-top:22px;max-width:520px;margin-left:auto;margin-right:auto}
+  .video-box{position:relative;width:100%;aspect-ratio:16/9;background:#f3efeb;border-radius:14px;overflow:hidden;border:1.5px solid var(--line);margin:22px 0;display:flex;align-items:center;justify-content:center;text-align:center}
+  .video-box iframe{width:100%;height:100%;border:0}
+  .video-ph{color:var(--muted);font-size:14px;padding:20px;line-height:1.6}
+  .video-ph .play-ico{width:44px;height:44px;color:var(--brown-soft);display:block;margin:0 auto 12px}
+  .video-ph b{color:var(--brown-1);display:block;margin-bottom:6px;font-size:15px}
 
-  /* Seção "Na Coleção Beauty você terá acesso à:" */
-  .access-section{background:#f2ece2;border-radius:24px;padding:44px 40px 48px;margin-top:34px}
-  .access-title{text-align:center;font-size:28px;font-weight:700;color:#5a3d26;letter-spacing:-.3px;max-width:640px;margin:0 auto 36px;line-height:1.3}
-  .access-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px 26px}
+  /* Grade "o que recebe" */
+  .access-section{background:#f2ece2;border-radius:22px;padding:40px 34px 44px;margin-top:34px}
+  .access-title{text-align:center;font-size:26px;font-weight:700;color:#5a3d26;letter-spacing:-.3px;max-width:640px;margin:0 auto 34px;line-height:1.3}
+  .access-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px 24px}
   .access-card{text-align:left}
-  .access-img{position:relative;width:100%;aspect-ratio:4/3;border-radius:14px;overflow:hidden;background:#e4daca;margin-bottom:16px}
+  .access-img{position:relative;width:100%;aspect-ratio:4/3;border-radius:14px;overflow:hidden;background:#e4daca;margin-bottom:14px}
   .access-img img{width:100%;height:100%;object-fit:cover;display:block}
-  .access-img.ph::after{content:"Imagem " attr(data-n);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#a2917a;font-size:14px;font-weight:600;letter-spacing:.5px}
-  .access-card h4{font-size:19px;font-weight:700;color:#3f2c1a;line-height:1.25;margin-bottom:8px}
-  .access-card p{font-size:14.5px;line-height:1.55;color:#7a6a58}
-  /* Revelação linha por linha ao rolar */
-  .reveal{opacity:0;transform:translateY(22px);transition:opacity .55s ease,transform .55s ease}
-  .reveal.in{opacity:1;transform:none}
+  .access-img.ph::after{content:"Imagem " attr(data-n);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#a2917a;font-size:14px;font-weight:600}
+  .access-card h4{font-size:18px;font-weight:700;color:#3f2c1a;line-height:1.25;margin-bottom:7px}
+  .access-card p{font-size:14px;line-height:1.5;color:#7a6a58}
 
-  /* Impede o zoom automático do iOS em campos de texto (fonte >= 16px) */
-  input,textarea,select{font-size:16px}
+  /* Painéis marrom (bônus / checkout) */
+  .step.wide{width:100%}
+  .brown-panel{background:linear-gradient(180deg,#6e4d31,#5a3d26);border-radius:22px;padding:44px 40px 48px;text-align:center;margin-top:22px}
+  .brown-panel:first-child{margin-top:0}
+  .panel-title{color:#fff;font-size:28px;font-weight:700;line-height:1.25;letter-spacing:-.3px;max-width:640px;margin:0 auto 12px}
+  .panel-sub{color:rgba(255,255,255,.72);font-size:16px;line-height:1.5;max-width:560px;margin:0 auto}
+  .bonus-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:32px}
+  .bonus-card{background:#efe7dc;border-radius:16px;overflow:hidden;text-align:left;display:flex;flex-direction:column}
+  .bonus-img{padding:14px 14px 0}
+  .bonus-img img{display:block;width:100%;height:186px;object-fit:cover;border-radius:12px}
+  .bonus-body{padding:18px 20px 22px}
+  .bonus-body h4{font-size:18px;font-weight:600;color:#4a3320;margin-bottom:8px}
+  .bonus-body p{font-size:14px;line-height:1.5;color:#7a6a58}
+  .checkout-panel{padding-bottom:44px}
+  .buy-card{background:#efe7dc;border-radius:20px;max-width:440px;margin:30px auto 0;padding:32px 28px 28px;text-align:center;position:relative}
+  .buy-logo{font-size:21px;font-weight:700;letter-spacing:2px;color:#4a3320;margin-bottom:16px}
+  .buy-logo u{text-decoration:none;border-bottom:2px solid var(--brown-soft);padding-bottom:2px}
+  .buy-lead{color:#8a7358;font-size:16px;line-height:1.4;max-width:280px;margin:0 auto 14px}
+  .buy-old{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
+  .buy-old s{color:#b09a80;font-size:16px}
+  .buy-badge{display:inline-block;background:#c0392b;color:#fff;font-size:12px;font-weight:800;letter-spacing:.5px;padding:4px 10px;border-radius:99px}
+  .buy-price{font-size:52px;font-weight:800;letter-spacing:-1px;color:#5a3d26;line-height:1;margin-bottom:12px}
+  .buy-inst{color:#8a7358;font-size:15px;margin-bottom:24px}
+  .buy-btn{width:100%;padding:19px;font-size:17px;border-radius:999px}
+  .buy-btn svg{width:18px;height:18px}
+  .trust{display:flex;justify-content:center;gap:14px;margin-top:24px}
+  .trust-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;color:#5a3d26}
+  .trust-item svg{width:26px;height:26px}
+  .trust-item span{font-size:12.5px;font-weight:600;line-height:1.25;text-align:center}
+  .guarantee{display:flex;align-items:center;gap:16px;background:#fbf7f3;border:1.5px solid var(--line);border-radius:16px;padding:20px;margin-top:16px;text-align:left}
+  .guarantee-ico{flex:none;width:56px;height:56px;border-radius:50%;background:#fff;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--brown-1)}
+  .guarantee-ico svg{width:30px;height:30px}
+  .guarantee-txt b{display:block;font-size:16px;color:var(--ink);margin-bottom:4px}
+  .guarantee-txt span{color:var(--muted);font-size:14px;line-height:1.5}
+
+  /* Barra vermelha (só oferta) */
+  .topbar{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:center;justify-content:center;gap:8px;
+    background:linear-gradient(90deg,#c0392b,#a93226);color:#fff;font-size:13.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:9px 16px}
+  .topbar svg{width:16px;height:16px;flex:none}
+  body.has-topbar .progress{top:38px}
+  body.has-topbar .stage{padding-top:96px}
 
   /* ================= MOBILE ================= */
   @media (max-width:560px){
-    .stage{padding:60px 0 40px;align-items:flex-start}
-    .wrap{padding:0 2em}              /* margem lateral de 2em */
+    .stage{padding:64px 0 44px}
+    .wrap,.wrap.wide{padding:0 1.5em}
+    h1{font-size:27px}
     h2{font-size:23px}
-    p.sub{font-size:15px}
-    .qnum{font-size:13px;margin-bottom:12px}
-    .options{margin-top:22px;gap:10px}
-    .opt{padding:14px;font-size:16px;border-radius:12px}
-    .opt:hover{transform:none}        /* sem deslocamento no touch */
-    .opt .key{width:26px;height:26px;font-size:13px}
-    .btn{padding:16px 22px;font-size:16px}
-    .btn.full{padding:17px}
-    .btn:hover{transform:none}
-    .video-box{margin:20px 0;border-radius:12px}
-    .expert{padding:18px}
-    .nav{right:16px;bottom:16px}
-    .nav-btn{width:44px;height:42px}
-
-    /* Bônus + checkout no mobile */
-    .wrap.wide{padding:0 2em}
-    .brown-panel{padding:34px 22px 36px;border-radius:20px;margin-top:16px}
-    .panel-title{font-size:24px}
-    .panel-sub{font-size:15px}
-    .bonus-grid{grid-template-columns:1fr;gap:18px;margin-top:26px}   /* empilhado */
-    .bonus-img img{height:210px}
-    /* Acesso à coleção no mobile */
-    .access-section{padding:34px 22px 36px;border-radius:20px;margin-top:26px}
-    .access-title{font-size:22px;margin-bottom:26px}
-    .access-grid{grid-template-columns:1fr;gap:26px}
+    .options{margin-top:22px}
+    .opt{font-size:16px;padding:14px}
+    .scale{gap:5px}
+    .scale button{font-size:15px}
+    .access-section{padding:32px 20px 36px;border-radius:18px}
+    .access-title{font-size:22px}
+    .access-grid{grid-template-columns:1fr;gap:24px}
     .access-img{aspect-ratio:16/11}
-    /* Diagnóstico no mobile */
-    .diag-result h2{font-size:26px;line-height:1.25}
-    .diag-text{font-size:16.5px;line-height:1.7}
-    .diag-solve{font-size:16px}
-    .diag-points li{font-size:15px;padding:14px 16px}
-    .lead-form{padding:22px 18px;border-radius:18px}
-    .buy-card{padding:28px 20px 26px;border-radius:18px}
+    .brown-panel{padding:34px 22px 38px;border-radius:18px}
+    .panel-title{font-size:23px}
+    .bonus-grid{grid-template-columns:1fr;gap:18px}
     .buy-price{font-size:44px}
-    .trust{gap:8px;margin-top:22px}
-    .trust-item span{font-size:11.5px}
-  }
-  @media (max-width:360px){
-    .wrap{padding:0 1.25em}
-    h2{font-size:21px}
-    .buy-price{font-size:40px}
+    .score-ring,.score-ring svg{width:150px;height:150px}
+    .res-diag{font-size:16px}
+    .lead-form{padding:0}
   }
 </style>
 </head>
@@ -294,178 +250,185 @@
 
 <div class="progress"><i id="bar"></i></div>
 
+<button class="back" id="backBtn" aria-label="Voltar" hidden>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
+</button>
+
 <div class="stage">
 <div class="wrap">
 
-  <!-- ================= PERGUNTAS ================= -->
-
-  <!-- P1 -->
-  <div class="step active" data-step>
-    <h2>Qual é a sua área na beleza?</h2>
-    <div class="options" data-auto></div>
-  </div>
-
-  <!-- P2 -->
-  <div class="step" data-step>
-    <h2>Há quanto tempo você trabalha com beleza?</h2>
-    <div class="options" data-auto></div>
-  </div>
-
-  <!-- P3 -->
-  <div class="step" data-step>
-    <h2>Como você divulga seus procedimentos hoje?</h2>
-    <div class="options" data-auto></div>
-  </div>
-
-  <!-- P4 -->
-  <div class="step" data-step>
-    <h2>Já perdeu cliente por não conseguir apresentar seu serviço de forma profissional?</h2>
-    <div class="options" data-auto></div>
-  </div>
-
-  <!-- P5 -->
-  <div class="step" data-step>
-    <h2>O que mais te trava para vender mais?</h2>
-    <div class="options" data-auto></div>
-  </div>
-
-  <!-- P6 -->
-  <div class="step" data-step>
-    <h2>O que mudaria se você tivesse materiais profissionais prontos?</h2>
-    <div class="options" data-auto></div>
-  </div>
-
-  <!-- P7 -->
-  <div class="step" data-step>
-    <h2>Se existisse um pacote pronto, só pra editar com a sua marca, você usaria?</h2>
-    <div class="options" data-auto></div>
-  </div>
-
-  <!-- ================= DIAGNÓSTICO (IA) ================= -->
-  <div class="step" data-step data-diagnose>
-    <div class="diag-loading" id="diagLoading">
-      <p class="diag-reassure" id="diagReassure">Analisando as suas respostas...</p>
-      <div class="diag-bar"><i></i></div>
-      <p class="diag-label">Criando o seu diagnóstico</p>
+  <!-- ===== ABERTURA ===== -->
+  <div class="step active" data-step data-open>
+    <div class="open-name">Diagnóstico Builder</div>
+    <div class="open-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      Leva menos de 2 minutos
     </div>
-    <div class="diag-result" id="diagResult" hidden>
-      <h2 id="diagTitle"></h2>
-      <p class="diag-text" id="diagText"></p>
-      <ul class="diag-points" id="diagPoints"></ul>
-      <p class="diag-solve">Boa notícia: eu já tenho a solução certa pra resolver isso. É só preencher abaixo para receber.</p>
-      <form class="lead-form" id="leadForm">
-        <p class="lead-cta">Preencha abaixo para receber o seu diagnóstico completo e os materiais</p>
-        <input type="text" id="leadNome" placeholder="Seu nome" autocomplete="name" required>
-        <input type="email" id="leadEmail" placeholder="Seu melhor e-mail" autocomplete="email" required>
-        <div class="phone-field">
-          <div class="phone-row">
-            <button type="button" class="ddi-btn" id="ddiBtn" aria-label="Selecionar país">
-              <img class="flag" id="ddiFlag" src="https://flagcdn.com/br.svg" alt="">
-              <span id="ddiCode">+55</span>
-              <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            <input type="tel" id="leadTel" placeholder="Seu WhatsApp" autocomplete="tel" required>
-          </div>
-          <div class="ddi-panel" id="ddiPanel" hidden>
-            <input type="text" class="ddi-search" id="ddiSearch" placeholder="Buscar país" autocomplete="off">
-            <div class="ddi-list" id="ddiList"></div>
-          </div>
-        </div>
-        <button type="submit" class="btn full">
-          Ver minha solução
+    <h1>Descubra se a forma como você se apresenta faz a cliente valorizar o seu trabalho, ou comparar só pelo preço.</h1>
+    <ul class="open-list">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Resultado personalizado</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>O seu Beauty Score</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>Plano de ação para melhorar a sua apresentação</li>
+    </ul>
+    <div class="btn-row">
+      <button class="btn full" id="startBtn">Começar diagnóstico
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== PERGUNTAS (opções geradas por JS) ===== -->
+  <div class="step" data-step data-q="area"></div>
+  <div class="step" data-step data-q="dor"></div>
+  <div class="step" data-step data-q="whats"></div>
+
+  <!-- ===== LOADING PARCIAL ===== -->
+  <div class="step" data-step data-loading="parcial">
+    <div class="load">
+      <h2>Aguarde...</h2>
+      <p>Estamos analisando como as suas clientes enxergam a sua marca. Comparando as suas respostas com padrões comuns de profissionais da beleza.</p>
+      <div class="load-bar"><i></i></div>
+      <ul class="checklist" data-check="Comunicação|WhatsApp|Apresentação"></ul>
+    </div>
+  </div>
+
+  <div class="step" data-step data-q="pos"></div>
+  <div class="step" data-step data-q="preco"></div>
+  <div class="step" data-step data-q="materiais"></div>
+  <div class="step" data-step data-q="transf"></div>
+  <div class="step" data-step data-q="auto"></div>
+
+  <!-- ===== LOADING FINAL (Beauty Score) ===== -->
+  <div class="step" data-step data-loading="final">
+    <div class="load">
+      <h2>Calculando o seu Beauty Score...</h2>
+      <div class="load-pct" id="loadPct">0%</div>
+      <ul class="checklist" data-check="Analisando a sua comunicação|Avaliando a sua apresentação|Medindo a sua autoridade percebida|Identificando pontos de conversão|Gerando o seu plano personalizado"></ul>
+    </div>
+  </div>
+
+  <!-- ===== RESULTADO ===== -->
+  <div class="step" data-step data-result>
+    <div class="result">
+      <div class="score-kicker">O seu Beauty Score</div>
+      <div class="score-ring">
+        <svg viewBox="0 0 160 160">
+          <circle class="track" cx="80" cy="80" r="66"></circle>
+          <circle class="fill" id="scoreFill" cx="80" cy="80" r="66"></circle>
+        </svg>
+        <div class="score-num"><b id="scoreNum">0</b><small>de 100</small></div>
+      </div>
+      <div class="perfil" id="perfilNome"></div>
+      <p class="perfil-sub" id="perfilSub"></p>
+
+      <div class="res-block">
+        <div class="res-title">Diagnóstico</div>
+        <p class="res-diag" id="resDiag"></p>
+      </div>
+      <div class="res-block">
+        <div class="res-title">Pontos de melhoria</div>
+        <div class="res-cards" id="resPontos"></div>
+      </div>
+      <div class="res-block">
+        <div class="res-title">O seu Plano Beauty</div>
+        <div class="res-cards" id="resPlano"></div>
+      </div>
+
+      <div class="ponte">
+        <b>Boa notícia.</b>
+        <p>Existe uma forma simples de resolver exatamente esses pontos, sem contratar designer e sem criar tudo do zero. Foi por isso que criamos a Coleção Beauty.</p>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn full" id="resCta">Quero melhorar a minha apresentação
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </button>
-      </form>
+      </div>
     </div>
   </div>
 
-  <!-- ================= VÍDEO 1 · PRODUTO ================= -->
-  <div class="step wide" data-step>
+  <!-- ===== CAPTURA DE LEAD ===== -->
+  <div class="step" data-step data-lead>
+    <h2>Falta pouco para o seu Plano Beauty</h2>
+    <p class="sub">Preencha abaixo para receber o seu plano personalizado e ver como resolver esses pontos.</p>
+    <form class="lead-form" id="leadForm">
+      <input type="text" id="leadNome" placeholder="Seu nome" autocomplete="name" required>
+      <input type="email" id="leadEmail" placeholder="Seu melhor e-mail" autocomplete="email" required>
+      <div class="phone-field">
+        <div class="phone-row">
+          <button type="button" class="ddi-btn" id="ddiBtn" aria-label="Selecionar país">
+            <img class="flag" id="ddiFlag" src="https://flagcdn.com/br.svg" alt="">
+            <span id="ddiCode">+55</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <input type="tel" id="leadTel" placeholder="Seu WhatsApp" autocomplete="tel" required>
+        </div>
+        <div class="ddi-panel" id="ddiPanel" hidden>
+          <input type="text" class="ddi-search" id="ddiSearch" placeholder="Buscar país" autocomplete="off">
+          <div class="ddi-list" id="ddiList"></div>
+        </div>
+      </div>
+      <button type="submit" class="btn full">Ver a solução
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </form>
+  </div>
+
+  <!-- ===== VÍDEO (VSL) + O QUE RECEBE ===== -->
+  <div class="step wide" data-step data-video>
     <div class="video-narrow">
-      <h2>Essa é a sua solução</h2>
-      <p class="sub">Com base no seu diagnóstico, a Coleção Beauty foi feita pra destravar exatamente o que te trava hoje. Assista e veja como vai funcionar pra você.</p>
+      <h2>Existe uma forma simples de resolver isso</h2>
+      <p class="sub">A Coleção Beauty é uma coleção com mais de 20 materiais prontos e editáveis para você transmitir mais valor, vender melhor pelo WhatsApp e apresentar seus serviços de forma muito mais profissional. Assista abaixo para entender como funciona.</p>
       <div class="video-box">
-        <!-- TROCAR: cole aqui o embed do VÍDEO DA SOLUÇÃO (Coleção Beauty) -->
+        <!-- TROCAR: cole aqui o embed do VÍDEO (VSL) -->
         <div class="video-ph"><svg class="play-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M10 8.5l6 3.5-6 3.5z" fill="currentColor" stroke="none"/></svg><b>Vídeo, A solução</b>Cole aqui o embed do vídeo<br>apresentando a Coleção Beauty.</div>
       </div>
-      <div class="btn-row after-video">
-        <button class="btn full" onclick="next()">
-          Quero a minha Coleção
+      <div class="btn-row" style="max-width:520px;margin-left:auto;margin-right:auto">
+        <button class="btn full" id="videoCta">Quero conhecer a Coleção Beauty
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </button>
       </div>
     </div>
-
-    <!-- Reforço: tudo o que ela vai receber -->
     <section class="access-section">
-      <h3 class="access-title">Tudo o que você vai receber na Coleção Beauty:</h3>
+      <h3 class="access-title">Tudo o que você recebe na Coleção Beauty:</h3>
       <div class="access-grid" data-access></div>
     </section>
   </div>
 
-  <!-- ================= BÔNUS + CHECKOUT ================= -->
+  <!-- ===== BÔNUS + CHECKOUT ===== -->
   <div class="step wide" data-step data-offer>
-
-    <!-- BÔNUS -->
     <section class="brown-panel">
       <h2 class="panel-title">Você ainda quer mais?</h2>
-      <p class="panel-sub">Além de todos os materiais editáveis da Coleção Beauty eu preparei alguns BÔNUS para você!</p>
+      <p class="panel-sub">Além de todos os materiais editáveis da Coleção Beauty, eu preparei alguns bônus para você.</p>
       <div class="bonus-grid">
-        <div class="bonus-card">
-          <div class="bonus-img"><img src="bonus-videoaulas.png" alt="Vídeo aulas"></div>
-          <div class="bonus-body">
-            <h4>Vídeo aulas</h4>
-            <p>Vídeo aulas ensinando a realizar edições seguindo sua identidade visual e inserindo fotos dos seus procedimentos.</p>
-          </div>
-        </div>
-        <div class="bonus-card">
-          <div class="bonus-img"><img src="bonus-app.png" alt="App Biteti Academy"></div>
-          <div class="bonus-body">
-            <h4>App Biteti Academy</h4>
-            <p>Acesso ao APP exclusivo da Biteti Academy para melhorar a sua experiência de aprendizado.</p>
-          </div>
-        </div>
-        <div class="bonus-card">
-          <div class="bonus-img"><img src="bonus-suporte.png" alt="Suporte"></div>
-          <div class="bonus-body">
-            <h4>Suporte</h4>
-            <p>Suporte individual para auxiliar em tudo que precisar.</p>
-          </div>
-        </div>
+        <div class="bonus-card"><div class="bonus-img"><img src="bonus-videoaulas.png" alt="Vídeo aulas"></div><div class="bonus-body"><h4>Vídeo aulas</h4><p>Vídeo aulas ensinando a realizar edições seguindo sua identidade visual e inserindo fotos dos seus procedimentos.</p></div></div>
+        <div class="bonus-card"><div class="bonus-img"><img src="bonus-app.png" alt="App Biteti Academy"></div><div class="bonus-body"><h4>App Biteti Academy</h4><p>Acesso ao APP exclusivo da Biteti Academy para melhorar a sua experiência de aprendizado.</p></div></div>
+        <div class="bonus-card"><div class="bonus-img"><img src="bonus-suporte.png" alt="Suporte"></div><div class="bonus-body"><h4>Suporte</h4><p>Suporte individual para auxiliar em tudo que precisar.</p></div></div>
       </div>
     </section>
 
-    <!-- CHECKOUT -->
     <section class="brown-panel checkout-panel">
-      <h2 class="panel-title">Vai deixar essa oportunidade passar? Eu acho que seu concorrente não, em?</h2>
-      <p class="panel-sub">Tenha acesso à Coleção Beauty hoje!</p>
-
+      <h2 class="panel-title">Comece a ser percebida como a profissional que você já é</h2>
+      <p class="panel-sub">Tenha acesso à Coleção Beauty hoje.</p>
       <div class="buy-card">
         <div class="buy-logo">COLEÇÃO <u>BEAUTY</u></div>
-        <p class="buy-lead">Seu investimento na Coleção Beauty será:</p>
+        <p class="buy-lead">O seu investimento na Coleção Beauty será:</p>
         <div class="buy-old"><s>De R$ 197,00</s><span class="buy-badge">76% OFF</span></div>
         <div class="buy-price">R$ 47,00</div>
         <p class="buy-inst">Ou 3x R$ 16,68 no cartão</p>
-
         <a class="btn buy-btn" href="https://pay.hub.la/dNyvh1D38OfwznSVuyux" target="_blank" rel="noopener" id="checkout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
           Quero a Coleção Beauty
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L5 13h5l-1 9 9-13h-6z"/></svg>
         </a>
-
         <div class="trust">
-          <div class="trust-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M14 9l-4 3 4 3"/></svg>
-            <span>Acesso<br>imediato</span>
-          </div>
-          <div class="trust-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/><circle cx="12" cy="11" r="1.6"/><path d="M12 12.5v2.5"/></svg>
-            <span>Compra<br>segura</span>
-          </div>
-          <div class="trust-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="9" r="5"/><path d="M9 13.5L8 22l4-2 4 2-1-8.5"/></svg>
-            <span>Garantia<br>incondicional</span>
-          </div>
+          <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M14 9l-4 3 4 3"/></svg><span>Acesso<br>imediato</span></div>
+          <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/><circle cx="12" cy="11" r="1.6"/><path d="M12 12.5v2.5"/></svg><span>Compra<br>segura</span></div>
+          <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="9" r="5"/><path d="M9 13.5L8 22l4-2 4 2-1-8.5"/></svg><span>Garantia<br>incondicional</span></div>
         </div>
+      </div>
+      <div class="guarantee">
+        <div class="guarantee-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <div class="guarantee-txt"><b>Garantia incondicional de 7 dias</b><span>Testou e não gostou? Devolvemos 100% do seu dinheiro, sem burocracia.</span></div>
       </div>
     </section>
   </div>
@@ -473,368 +436,329 @@
 </div>
 </div>
 
-<!-- Navegação estilo Typeform -->
-<div class="nav">
-  <button class="nav-btn" id="navUp" aria-label="Voltar">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>
-  </button>
-  <button class="nav-btn" id="navDown" aria-label="Avançar">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-  </button>
-</div>
-
 <script>
-  // Opções de cada pergunta (na ordem dos steps)
-  const OPTIONS = [
-    ["Lash designer / cílios","Designer de sobrancelhas","Maquiagem","Estética / limpeza de pele","Cabelo","Unhas / nail designer","Harmonização facial","Ainda vou começar"],
-    ["Ainda não comecei","Menos de 1 ano","1 a 3 anos","Mais de 3 anos"],
-    ["Mando textão no WhatsApp","Posto no Instagram sem muito padrão","Só impulsiono posts no Instagram","Faço tráfego pago com gestor ou agência","Só no boca a boca","Não divulgo direito"],
-    ["Sim, várias vezes","Acho que sim","Não sei dizer"],
-    ["Não sei criar material bonito","Não tenho tempo pra isso","Não sei precificar / montar combo","Meus materiais não passam profissionalismo"],
-    ["Cobraria mais caro","Fecharia mais clientes","Passaria mais confiança","Todas as anteriores"],
-    ["Com certeza","Provavelmente sim"]
-  ];
-  const KEYS="ABCDEFGH";
-  const checkSvg='<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>';
+/* ===================== CONFIG DAS PERGUNTAS ===================== */
+const CFG = {
+  area:{n:1, tipo:'single', w:0, titulo:'Qual é a sua principal área de atuação?',
+    opts:[['Design de sobrancelhas'],['Brow Lamination'],['Lash Lifting'],['Extensão de cílios'],['Micropigmentação'],['Unhas'],['Cabeleireira'],['Esteticista'],['Maquiadora'],['Outro']]},
+  dor:{n:2, tipo:'single', w:1, titulo:'Hoje, qual situação mais acontece com você?',
+    opts:[['A cliente pergunta o preço e some.',0],['Tenho dificuldade para mostrar o valor do meu trabalho.',1],['Sinto que meu Instagram não transmite profissionalismo.',1],['Quero cobrar mais, mas fico insegura.',2],['Já vendo bem, mas quero parecer ainda mais profissional.',4]]},
+  whats:{n:3, tipo:'single', w:2, titulo:'Quando uma cliente chama no WhatsApp, como você normalmente apresenta seus procedimentos?',
+    opts:[['Escrevo tudo por mensagem.',0],['Mando algumas fotos.',1],['Cada conversa acaba sendo diferente.',1],['Tenho alguns materiais, mas sem padrão.',2],['Tenho uma apresentação organizada.',4]]},
+  pos:{n:4, tipo:'single', w:2, titulo:'O que normalmente acontece depois que você envia as informações?',
+    opts:[['A cliente visualiza e desaparece.',0],['Faz mais perguntas sobre preço.',1],['Diz que vai pensar.',1],['Agenda normalmente.',4],['Depende da cliente.',2]]},
+  preco:{n:5, tipo:'single', w:2, titulo:'Quando uma cliente diz "Está caro", qual é o seu primeiro pensamento?',
+    opts:[['Ela não percebeu o valor do meu trabalho.',2],['Acho que não expliquei direito.',1],['Acabo oferecendo desconto.',0],['Fico insegura.',0],['Isso quase nunca acontece.',4]]},
+  materiais:{n:6, tipo:'multi', w:2, titulo:'Quais destes materiais você possui hoje?', sub:'Você pode marcar mais de um.',
+    opts:[['Catálogo dos procedimentos'],['Material de pós-atendimento'],['Vale-presente'],['Cardápio de serviços'],['Material profissional para WhatsApp'],['Identidade visual padronizada'],['Nenhum deles']]},
+  transf:{n:7, tipo:'single', w:0, titulo:'Se a sua apresentação transmitisse mais profissionalismo, o que você acredita que mudaria primeiro?',
+    opts:[['Conseguiria cobrar melhor.'],['Fecharia mais clientes.'],['Minhas clientes confiariam mais em mim.'],['Venderia mais procedimentos.'],['Todas as alternativas.']]},
+  auto:{n:8, tipo:'scale', w:2, titulo:'De 1 a 10, quanto você acredita que as suas clientes enxergam o verdadeiro valor do seu trabalho antes de perguntarem o preço?', sub:'1 = Quase nada    ·    10 = Enxergam muito valor'}
+};
+const TOTAL_Q = 8;
+const KEYS = "ABCDEFGHIJ";
+const checkSvg='<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>';
 
-  // Itens da seção "Na Coleção Beauty você terá acesso à:" (copy oficial da página)
-  const ACCESS = [
-    ["Revista de apresentação de Procedimentos","Transforme a experiência da sua clientes ao receber uma revista apresentando todos os procedimentos que você oferece, seja ela digital ou física."],
-    ["Regulamento da sua empresa","Aumente a credibilidade enviando um regulamento com todas as regras do seu negócio de forma personalizada."],
-    ["Cardápio","Apresente de forma elegante todas as experiências gastronômicas que o seu cliente pode receber no seu espaço."],
-    ["Placa de Pix","Tenha uma placa de pix elegante e personalizada para sua cliente realizar o pagamento dos procedimentos realizados."],
-    ["Template para post de combos","Template de post editável para aumentar o ticket médio por clientes oferecendo combos estratégicos."],
-    ["Template para stories de combos","Template de stories editável para aumentar o ticket médio por clientes oferecendo combos estratégicos."],
-    ["Ficha de anamnese","Uma ficha de anamnese editável e com a sua identidade visual para transmitir confiança para o seu cliente."],
-    ["Cuidado Pós Procedimento","Encante seus clientes com um flyer de cuidados pós procedimento, se diferenciando da sua concorrência."],
-    ["Cartão de visita","Receba um modelo pronto de cartão de visita com todas as informações do seu negócio."],
-    ["Vale Presente","Tenha um vale presente com sua identidade visual para seus clientes poderem presentear amigos e familiares com seus procedimentos."],
-    ["Cupom de Sorteio","Sorteios são uma ótima forma para incentivar os clientes a gastarem mais no seu espaço para concorrer a brindes, tenha cupons personalizados com sua identidade visual."],
-    ["Jornal Beauty","Transforme a experiência da sua clientes ao receber um jornal apresentando todos os procedimentos e informações do seu negócio."],
-    ["Calendário Beauty","Tenha um calendário personalizado para apresentar as datas disponíveis para atendimentos de acordo com os meses."],
-    ["Sacola personalizada","Você vai ter acesso ao fornecedor das sacolas da Biteti Beauty."],
-    ["PDF de apresentação para cursos Beauty","Converta mais alunas com um PDF exclusivo de alta conversão para cursos na área da beleza."]
-  ];
-  document.querySelectorAll('[data-access]').forEach(grid=>{
-    ACCESS.forEach(([title,desc],k)=>{
-      const n=k+1;
-      const card=document.createElement('div');
-      card.className='access-card reveal';
-      card.innerHTML=
-        '<div class="access-img"><img src="colecao-'+n+'.png" alt="'+title+'" '+
-        'onerror="this.style.display=\'none\';this.parentNode.classList.add(\'ph\');this.parentNode.dataset.n=\''+n+'\'"></div>'+
-        '<h4>'+title+'</h4><p>'+desc+'</p>';
-      grid.appendChild(card);
-    });
-  });
-  // Revelação linha por linha ao rolar (com pequeno atraso por coluna)
-  const io=new IntersectionObserver((ents)=>{
-    ents.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
-  },{threshold:.15});
-  document.querySelectorAll('.reveal').forEach((el,k)=>{ el.style.transitionDelay=((k%3)*90)+'ms'; io.observe(el); });
+/* Itens "o que recebe" */
+const ACCESS=[
+  ["Revista de apresentação de Procedimentos","Apresente todos os seus procedimentos numa revista com a sua marca."],
+  ["Regulamento da sua empresa","Aumente a credibilidade com um regulamento personalizado."],
+  ["Cardápio","Apresente de forma elegante todas as experiências que você oferece."],
+  ["Placa de Pix","Placa de pix elegante e personalizada para os pagamentos."],
+  ["Template para post de combos","Post editável para aumentar o ticket com combos."],
+  ["Template para stories de combos","Stories editável para vender combos estratégicos."],
+  ["Ficha de anamnese","Ficha editável com a sua identidade visual, passando confiança."],
+  ["Cuidado Pós Procedimento","Flyer de cuidados pós, se diferenciando da concorrência."],
+  ["Cartão de visita","Modelo pronto com todas as informações do seu negócio."],
+  ["Vale Presente","Vale presente com a sua identidade para presentear."],
+  ["Cupom de Sorteio","Cupons personalizados para incentivar a cliente a gastar mais."],
+  ["Jornal Beauty","Jornal apresentando seus procedimentos e informações."],
+  ["Calendário Beauty","Calendário com as datas disponíveis para atendimento."],
+  ["Sacola personalizada","Acesso ao fornecedor das sacolas da Biteti Beauty."],
+  ["PDF de apresentação para cursos Beauty","PDF de alta conversão para vender cursos."]
+];
 
-  const steps=[...document.querySelectorAll('[data-step]')];
-  const bar=document.getElementById('bar');
-  const answers={};                 // {stepIndex: optionIndex}
-  const questionSteps=[];           // índices dos steps que são perguntas
-  let i=0;
+/* ===================== TRACKING ===================== */
+function track(ev,params){
+  try{
+    if(window.fbq) window.fbq('trackCustom',ev,params||{});
+    (window.dataLayer=window.dataLayer||[]).push(Object.assign({event:ev},params||{}));
+  }catch(e){}
+}
 
-  document.querySelectorAll('[data-auto]').forEach((box,qi)=>{
-    const stepEl=box.closest('[data-step]');
-    const si=steps.indexOf(stepEl);
-    questionSteps.push(si);
-    OPTIONS[qi].forEach((label,oi)=>{
-      const b=document.createElement('button');
-      b.className='opt';
-      b.innerHTML='<span class="key">'+KEYS[oi]+'</span>'+label+checkSvg;
+/* ===================== ESTADO ===================== */
+const steps=[...document.querySelectorAll('[data-step]')];
+const bar=document.getElementById('bar');
+const backBtn=document.getElementById('backBtn');
+const topbar=document.getElementById('topbar');
+const answers={}; // id -> {label, pts, value?, labels?}
+let i=0;
+
+/* ===================== GERA AS PERGUNTAS ===================== */
+steps.forEach(step=>{
+  const id=step.getAttribute('data-q'); if(!id) return;
+  const c=CFG[id];
+  let html='<div class="qcount">Pergunta '+c.n+' de '+TOTAL_Q+' · Falta pouco para o seu resultado</div><h2>'+c.titulo+'</h2>';
+  if(c.sub) html+='<p class="sub">'+c.sub+'</p>';
+  if(c.tipo==='single'){
+    html+='<div class="options">'+c.opts.map((o,k)=>'<button class="opt" data-oi="'+k+'"><span class="key">'+KEYS[k]+'</span>'+o[0]+checkSvg+'</button>').join('')+'</div>';
+  }else if(c.tipo==='multi'){
+    const cbox='<span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span>';
+    html+='<div class="options">'+c.opts.map((o,k)=>'<button class="opt multi" data-oi="'+k+'">'+cbox+o[0]+'</button>').join('')+'</div>'+
+      '<div class="btn-row"><button class="btn full" data-continue disabled>Continuar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>';
+  }else if(c.tipo==='scale'){
+    let sc='<div class="scale">';
+    for(let v=1;v<=10;v++) sc+='<button data-v="'+v+'">'+v+'</button>';
+    sc+='</div><div class="scale-labels"><span>Quase nada</span><span>Muito valor</span></div>';
+    html+=sc;
+  }
+  step.innerHTML=html;
+
+  if(c.tipo==='single'){
+    step.querySelectorAll('.opt').forEach((b,k)=>{
       b.onclick=()=>{
-        answers[si]=oi;
-        [...box.children].forEach((c,n)=>c.classList.toggle('selected',n===oi));
-        setTimeout(next,180);       // pequeno delay pra ver a seleção
+        answers[id]={label:c.opts[k][0], pts:c.opts[k][1], oi:k};
+        step.querySelectorAll('.opt').forEach((x,n)=>x.classList.toggle('selected',n===k));
+        track('quiz_question_answered',{question_id:id});
+        setTimeout(next,190);
       };
-      box.appendChild(b);
     });
-  });
-
-  const isQuestion=n=>questionSteps.includes(n);
-  const answered=n=>!isQuestion(n) || answers[n]!==undefined;
-
-  const navUp=document.getElementById('navUp');
-  const navDown=document.getElementById('navDown');
-
-  const wrapEl=document.querySelector('.wrap');
-  function render(){
-    steps.forEach((s,n)=>s.classList.toggle('active',n===i));
-    wrapEl.classList.toggle('wide',steps[i].classList.contains('wide'));
-    bar.style.width=(i/(steps.length-1)*100)+'%';
-    navUp.classList.toggle('disabled',i===0);
-    navDown.classList.toggle('disabled',i===steps.length-1);
-    // marca visualmente a resposta já dada ao voltar
-    steps[i].querySelectorAll('.opt').forEach((c,n)=>c.classList.toggle('selected',answers[i]===n));
-    // barra vermelha aparece SOMENTE na tela de oferta
-    const isOffer=steps[i].hasAttribute('data-offer');
-    topbar.hidden=!isOffer;
-    document.body.classList.toggle('has-topbar',isOffer);
-    // esconde as setas de navegação na tela de diagnóstico (segue pelo formulário)
-    const isDiag=steps[i].hasAttribute('data-diagnose');
-    document.querySelector('.nav').style.display=isDiag?'none':'flex';
-    // dispara o diagnóstico ao chegar na tela
-    if(isDiag) runDiagnose();
-    window.scrollTo({top:0,behavior:'smooth'});
-  }
-  function next(){
-    if(i>=steps.length-1) return;
-    if(!answered(i)){ shake(); return; }
-    i++; render();
-  }
-  function prev(){ if(i>0){ i--; render(); } }
-  function shake(){
-    const box=steps[i].querySelector('.options');
-    if(!box) return;
-    box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
-  }
-
-  navUp.onclick=prev;
-  navDown.onclick=next;
-  document.addEventListener('keydown',e=>{
-    if(e.key==='ArrowUp'){prev();e.preventDefault();}
-    if(e.key==='ArrowDown'||e.key==='Enter'){next();e.preventDefault();}
-  });
-
-  /* ================= DIAGNÓSTICO COM IA (Supabase Edge Function) ================= */
-  const topbar=document.getElementById('topbar');
-  // Endpoints do Supabase (a anon key é pública por design)
-  const SUPA_URL='https://knqfiqyvpglyfabsmmlm.supabase.co';
-  const DIAG_URL=SUPA_URL+'/functions/v1/diagnostico';
-  const SUPA_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtucWZpcXl2cGdseWZhYnNtbWxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NDgxMzIsImV4cCI6MjA5OTEyNDEzMn0.DQfVd2XMpSjqkCyuX4SmIxNzMARjr9jFh0boTt2bZTI';
-
-  function coletaRespostas(){
-    return questionSteps
-      .filter(si=>answers[si]!==undefined)
-      .map(si=>{
-        const perg=steps[si].querySelector('h2').textContent.trim();
-        const resp=steps[si].querySelectorAll('.opt')[answers[si]].textContent.trim();
-        return {pergunta:perg, resposta:resp};
-      });
-  }
-
-  // Fallback INTELIGENTE: monta um diagnóstico personalizado lendo as respostas dela
-  // (usado quando a IA está indisponível, ex.: token do Claude ainda não configurado).
-  const cap=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s;
-  const acha=(resp,kw)=>{const f=resp.find(r=>r.pergunta.toLowerCase().includes(kw));return f?f.resposta:'';};
-  function montaFallback(resp){
-    const area=acha(resp,'área');
-    const tempo=acha(resp,'tempo')||acha(resp,'trabalha');
-    const divulga=acha(resp,'divulga');
-    const trava=acha(resp,'trava');
-
-    const iniciante=/começar|começa|não comecei/i.test(area+' '+tempo);
-    const areaNome=area && !iniciante ? area.toLowerCase().split('/')[0].trim() : '';
-    const areaTxt=areaNome ? ('como '+areaNome) : 'na área da beleza';
-    let tempoTxt='';
-    if(/mais de 3/i.test(tempo)) tempoTxt=' há mais de 3 anos';
-    else if(/1 a 3/i.test(tempo)) tempoTxt=' há alguns anos';
-    else if(/menos de 1/i.test(tempo)) tempoTxt=' há pouco tempo';
-
-    const trafego=/tráfego|impulsion/i.test(divulga);
-    const divMap=[
-      [/textão|whatsapp/i,'ainda apresenta seus procedimentos por textão no WhatsApp'],
-      [/sem muito padrão|sem padrão/i,'posta no Instagram mas sem um padrão que passe profissionalismo'],
-      [/impulsion/i,'impulsiona post, mas o material não converte quem clica'],
-      [/tráfego/i,'paga tráfego, mas material amador queima esse investimento: o clique chega e não vira cliente'],
-      [/boca a boca/i,'depende só do boca a boca e fica invisível para clientes novas'],
-      [/não divulgo/i,'quase não divulga e deixa dinheiro na mesa todo mês'],
-    ];
-    const divTxt=(divMap.find(d=>d[0].test(divulga))||[,'não tem uma divulgação que gere desejo'])[1];
-
-    const travaMap=[
-      [/material bonito|bonito/i,'não ter material bonito pra mostrar'],
-      [/tempo/i,'não ter tempo pra criar material'],
-      [/precificar|combo/i,'não saber precificar e montar combo'],
-      [/profissionalismo/i,'seus materiais não passarem profissionalismo'],
-    ];
-    const travaTxt=(travaMap.find(t=>t[0].test(trava))||[,'a falta de material profissional'])[1];
-
-    const titulo = trafego ? 'Seu tráfego está sendo desperdiçado'
-                 : iniciante ? 'Você pode começar já como profissional'
-                 : 'Eu sei exatamente o seu problema';
-
-    let texto = iniciante
-      ? `Você está começando ${areaTxt==='na área da beleza'?'na beleza':areaTxt} e a maior chance que tem é já entrar com cara de profissional. Sem material que passe autoridade, a cliente não percebe o valor do seu trabalho e você acaba cobrando barato desde o primeiro dia. Isso não é falta de talento, é falta de material pronto, e dá pra resolver hoje.`
-      : `Você atua ${areaTxt}${tempoTxt} e hoje ${divTxt}. Somado a ${travaTxt}, isso faz a sua cliente não enxergar o valor real do seu trabalho, e o resultado é você cobrar menos do que merece e perder venda pra quem se apresenta melhor. Nada disso é falta de talento: é falta de material profissional pronto que gere desejo e feche mais combos.`;
-
-    const pontos=[
-      cap(travaTxt)+' está te fazendo cobrar abaixo do que vale',
-      trafego ? 'Material amador queima o dinheiro do seu tráfego'
-              : 'Sem padrão profissional, a cliente some e vai pra concorrência',
-      'A Coleção Beauty entrega tudo pronto, é só editar com a sua marca'
-    ];
-    return {titulo,texto,pontos};
-  }
-
-  let diagDone=false;
-  async function runDiagnose(){
-    if(diagDone) return; diagDone=true;
-    const loading=document.getElementById('diagLoading');
-    const result=document.getElementById('diagResult');
-    const started=Date.now();
-    const resp=coletaRespostas();
-    const fb=montaFallback(resp);
-    // mensagens rotativas pra acalmar o lead durante a espera
-    const reassure=document.getElementById('diagReassure');
-    const MSGS=['Analisando as suas respostas...','Identificando o que trava as suas vendas...','Só mais uns segundos...','Quase lá, montando o seu diagnóstico...','Finalizando o seu diagnóstico...'];
-    let mi=0;
-    const rot=setInterval(()=>{
-      mi=(mi+1)%MSGS.length;
-      reassure.style.opacity='0';
-      setTimeout(()=>{ reassure.textContent=MSGS[mi]; reassure.style.opacity='1'; },300);
-    },2200);
-    const show=(d)=>{
-      // garante que a tela "Criando diagnóstico" apareça por pelo menos 1.4s
-      const wait=Math.max(0,1400-(Date.now()-started));
-      setTimeout(()=>{
-        clearInterval(rot);
-        document.getElementById('diagTitle').textContent=d.titulo||fb.titulo;
-        document.getElementById('diagText').textContent=d.texto||fb.texto;
-        const ul=document.getElementById('diagPoints'); ul.innerHTML='';
-        (d.pontos&&d.pontos.length?d.pontos:fb.pontos).forEach(p=>{const li=document.createElement('li');li.textContent=p;ul.appendChild(li);});
-        loading.hidden=true; result.hidden=false;
-      },wait);
+  }else if(c.tipo==='multi'){
+    const btns=[...step.querySelectorAll('.opt')];
+    const cont=step.querySelector('[data-continue]');
+    const nenhumIdx=c.opts.length-1;
+    btns.forEach((b,k)=>{
+      b.onclick=()=>{
+        if(k===nenhumIdx){ btns.forEach((x,n)=>x.classList.toggle('selected',n===nenhumIdx && !b.classList.contains('selected'))); }
+        else{ b.classList.toggle('selected'); btns[nenhumIdx].classList.remove('selected'); }
+        const anySel=btns.some(x=>x.classList.contains('selected'));
+        cont.disabled=!anySel;
+      };
+    });
+    cont.onclick=()=>{
+      const sel=btns.map((x,k)=>x.classList.contains('selected')?k:-1).filter(k=>k>=0);
+      const labels=sel.map(k=>c.opts[k][0]);
+      const nenhum=sel.includes(nenhumIdx);
+      const cnt=nenhum?0:labels.length;
+      answers[id]={labels, pts:Math.min(4,cnt)};
+      track('quiz_question_answered',{question_id:id});
+      next();
     };
-    try{
-      const ctrl=new AbortController();
-      const to=setTimeout(()=>ctrl.abort(),14000);   // nunca gira mais que 14s
-      const r=await fetch(DIAG_URL,{
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPA_ANON,'apikey':SUPA_ANON},
-        body:JSON.stringify({respostas:resp}),
-        signal:ctrl.signal
-      });
-      clearTimeout(to);
-      if(!r.ok) throw new Error('http '+r.status);
-      const d=await r.json();
-      if(!d||!d.texto) throw new Error('resposta vazia');
-      show(d);
-    }catch(err){
-      console.warn('Diagnóstico via IA indisponível, usando fallback:',err);
-      show(fb);   // fallback personalizado: nunca trava nem falha
+  }else if(c.tipo==='scale'){
+    step.querySelectorAll('.scale button').forEach(b=>{
+      b.onclick=()=>{
+        const v=+b.getAttribute('data-v');
+        step.querySelectorAll('.scale button').forEach(x=>x.classList.toggle('selected',x===b));
+        answers[id]={value:v, pts:Math.round((v-1)/9*4)};
+        track('quiz_question_answered',{question_id:id});
+        setTimeout(next,220);
+      };
+    });
+  }
+});
+
+/* ===================== SCORE E PERFIL ===================== */
+function calcScore(){
+  let obt=0,pos=0;
+  Object.keys(CFG).forEach(id=>{
+    const c=CFG[id]; if(!c.w) return;
+    pos+=4*c.w;
+    const a=answers[id];
+    if(a && typeof a.pts==='number') obt+=a.pts*c.w;
+  });
+  let s=pos?Math.round(obt/pos*100):50;
+  return Math.max(20,Math.min(100,s));
+}
+function perfilDe(score){
+  if(score<=35) return {nome:'Apresentação improvisada', sub:'A sua técnica pode ser boa, mas a sua apresentação ainda não transmite o valor que deveria.'};
+  if(score<=60) return {nome:'Valor pouco percebido', sub:'A sua maior trava está na forma como a cliente entende o valor do seu trabalho.'};
+  if(score<=80) return {nome:'Profissional em crescimento', sub:'Você já tem uma base, mas pode elevar a sua comunicação para vender com mais segurança.'};
+  return {nome:'Marca em evolução', sub:'Você já entende a importância da apresentação, mas ainda pode criar uma experiência mais completa.'};
+}
+function respostasArr(){
+  return Object.keys(CFG).filter(id=>answers[id]).map(id=>{
+    const a=answers[id]; let r;
+    if(a.labels) r=a.labels.join(', ');
+    else if(a.value) r=a.value+'/10';
+    else r=a.label;
+    return {pergunta:CFG[id].titulo, resposta:r};
+  });
+}
+
+/* ===================== DIAGNÓSTICO (IA + fallback) ===================== */
+const SUPA_URL='https://knqfiqyvpglyfabsmmlm.supabase.co';
+const DIAG_URL=SUPA_URL+'/functions/v1/diagnostico';
+const SUPA_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtucWZpcXl2cGdseWZhYnNtbWxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NDgxMzIsImV4cCI6MjA5OTEyNDEzMn0.DQfVd2XMpSjqkCyuX4SmIxNzMARjr9jFh0boTt2bZTI';
+
+function fallbackDiag(score,perfil){
+  return {
+    titulo: perfil.nome,
+    texto: perfil.sub+' Pelas suas respostas, o problema não está na sua técnica, e sim na forma como você apresenta o seu trabalho, principalmente no WhatsApp. Enquanto a apresentação parecer improvisada, a cliente compara você pelo preço em vez de enxergar o valor. E isso tem solução.',
+    pontos:['Apresentação dos serviços sem padrão','Comunicação no WhatsApp improvisada','Marca sem identidade visual definida'],
+    plano:['Organizar a apresentação dos procedimentos','Transmitir profissionalismo antes do atendimento','Criar materiais que aumentem a confiança da cliente']
+  };
+}
+let diagData=null;
+function fetchDiag(score,perfil){
+  const fb=fallbackDiag(score,perfil);
+  const ctrl=new AbortController();
+  const to=setTimeout(()=>ctrl.abort(),14000);
+  return fetch(DIAG_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPA_ANON,'apikey':SUPA_ANON},
+    body:JSON.stringify({respostas:respostasArr(), score, perfil:perfil.nome}),
+    signal:ctrl.signal
+  }).then(r=>{clearTimeout(to); if(!r.ok) throw 0; return r.json();})
+    .then(d=>{ if(!d||!d.texto) throw 0; return {titulo:d.titulo||fb.titulo,texto:d.texto,pontos:(d.pontos&&d.pontos.length?d.pontos:fb.pontos),plano:(d.plano&&d.plano.length?d.plano:fb.plano)}; })
+    .catch(()=>fb);
+}
+
+/* Preenche a tela de resultado */
+function preencheResultado(){
+  const score=calcScore();
+  const perfil=perfilDe(score);
+  document.getElementById('perfilNome').textContent='Perfil: '+perfil.nome;
+  document.getElementById('perfilSub').textContent=perfil.sub;
+  // anima o número e o anel
+  const R=66, C=2*Math.PI*R;
+  const fill=document.getElementById('scoreFill');
+  fill.style.strokeDasharray=C; fill.style.strokeDashoffset=C;
+  const numEl=document.getElementById('scoreNum');
+  requestAnimationFrame(()=>{ fill.style.strokeDashoffset=C*(1-score/100); });
+  let cur=0; const step=Math.max(1,Math.round(score/40));
+  const t=setInterval(()=>{ cur=Math.min(score,cur+step); numEl.textContent=cur; if(cur>=score) clearInterval(t); },28);
+  // diagnóstico (IA já resolvida ou fallback)
+  const d=diagData||fallbackDiag(score,perfil);
+  document.getElementById('resDiag').textContent=d.texto;
+  const pc=document.getElementById('resPontos'); pc.innerHTML='';
+  d.pontos.slice(0,3).forEach(p=>{const el=document.createElement('div');el.className='res-card';el.innerHTML='<span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span>'+p;pc.appendChild(el);});
+  const pl=document.getElementById('resPlano'); pl.innerHTML='';
+  d.plano.slice(0,3).forEach((p,k)=>{const el=document.createElement('div');el.className='res-card';el.innerHTML='<span class="num">'+(k+1)+'</span>'+p;pl.appendChild(el);});
+  track('quiz_result_view',{beauty_score:score, perfil:perfil.nome});
+}
+
+/* ===================== LOADINGS ===================== */
+function runChecklist(ul, dur, cb){
+  const items=[...ul.querySelectorAll('li')];
+  const gap=dur/(items.length+1);
+  items.forEach((li,k)=> setTimeout(()=>li.classList.add('done'), gap*(k+1)));
+  if(cb) setTimeout(cb, dur+250);
+}
+let parcialDone=false;
+function runParcial(step){
+  if(step.dataset.ran) return; step.dataset.ran='1';
+  track('quiz_mid_loading_view');
+  runChecklist(step.querySelector('.checklist'), 2800, next);
+}
+let finalRan=false;
+function runFinal(step){
+  if(step.dataset.ran) return; step.dataset.ran='1';
+  track('quiz_complete');
+  const score=calcScore(), perfil=perfilDe(score);
+  const diagP=fetchDiag(score,perfil).then(d=>{diagData=d;});
+  // porcentagem subindo
+  const pctEl=document.getElementById('loadPct'); let p=0;
+  const pt=setInterval(()=>{ p=Math.min(99,p+2); pctEl.textContent=p+'%'; if(p>=99)clearInterval(pt); },95);
+  const MIN=4800;
+  runChecklist(step.querySelector('.checklist'), MIN, null);
+  const started=Date.now();
+  diagP.then(()=>{
+    const wait=Math.max(0,MIN-(Date.now()-started));
+    setTimeout(()=>{ clearInterval(pt); pctEl.textContent='100%'; setTimeout(next,250); }, wait);
+  });
+}
+
+/* ===================== NAVEGAÇÃO ===================== */
+const wrapEl=document.querySelector('.wrap');
+function render(){
+  steps.forEach((s,n)=>s.classList.toggle('active',n===i));
+  const el=steps[i];
+  const isQ=el.hasAttribute('data-q');
+  const isOffer=el.hasAttribute('data-offer');
+  // progresso
+  bar.style.width=(isQ ? CFG[el.getAttribute('data-q')].n/TOTAL_Q*100 : (el.hasAttribute('data-open')?0:100))+'%';
+  wrapEl.classList.toggle('wide', el.classList.contains('wide'));
+  // voltar: só em perguntas (menos a primeira)
+  backBtn.hidden=!(isQ && CFG[el.getAttribute('data-q')].n>1);
+  // barra vermelha só na oferta
+  topbar.hidden=!isOffer;
+  document.body.classList.toggle('has-topbar',isOffer);
+  // remarca a resposta já dada, ao voltar
+  if(isQ){
+    const id=el.getAttribute('data-q'); const a=answers[id]; const c=CFG[id];
+    if(a){
+      if(c.tipo==='single'){ el.querySelectorAll('.opt').forEach((x,n)=>x.classList.toggle('selected', n===a.oi)); }
+      else if(c.tipo==='scale'){ el.querySelectorAll('.scale button').forEach(x=>x.classList.toggle('selected', +x.getAttribute('data-v')===a.value)); }
+      else if(c.tipo==='multi'){ const set=new Set(a.labels||[]); el.querySelectorAll('.opt').forEach(x=>x.classList.toggle('selected', set.has(x.textContent.trim()))); const cont=el.querySelector('[data-continue]'); if(cont) cont.disabled=!(a.labels&&a.labels.length); }
     }
   }
+  // dispara loadings / resultado
+  if(el.getAttribute('data-loading')==='parcial') runParcial(el);
+  if(el.getAttribute('data-loading')==='final') runFinal(el);
+  if(el.hasAttribute('data-result')) preencheResultado();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function go(n){ if(n>=0 && n<steps.length){ i=n; render(); } }
+function next(){ if(i<steps.length-1) go(i+1); }
+function prev(){ let n=i-1; while(n>0 && steps[n].getAttribute('data-loading')) n--; go(n); }
+backBtn.onclick=prev;
 
-  /* Captura do lead (nome, e-mail, telefone) -> tabela "leads" no Supabase.
-     Roda em segundo plano com timeout, para NUNCA travar a navegação. */
-  function salvaLead(dados){
-    try{
-      const ctrl=new AbortController();
-      const t=setTimeout(()=>ctrl.abort(),6000);
-      fetch(SUPA_URL+'/rest/v1/leads',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON,'Prefer':'return=minimal'},
-        body:JSON.stringify(dados),
-        signal:ctrl.signal,
-        keepalive:true
-      }).then(()=>clearTimeout(t)).catch(err=>console.warn('Falha ao salvar lead:',err));
-    }catch(err){ console.warn('Falha ao salvar lead:',err); }
-  }
-  /* ===== Seletor de DDI com bandeiras SVG (flagcdn) ===== */
-  const PAISES=[
-    ["Afeganistão","af","+93"],["África do Sul","za","+27"],["Albânia","al","+355"],["Alemanha","de","+49"],
-    ["Andorra","ad","+376"],["Angola","ao","+244"],["Anguilla","ai","+1264"],["Antígua e Barbuda","ag","+1268"],
-    ["Arábia Saudita","sa","+966"],["Argélia","dz","+213"],["Argentina","ar","+54"],["Armênia","am","+374"],
-    ["Aruba","aw","+297"],["Austrália","au","+61"],["Áustria","at","+43"],["Azerbaijão","az","+994"],
-    ["Bahamas","bs","+1242"],["Bahrein","bh","+973"],["Bangladesh","bd","+880"],["Barbados","bb","+1246"],
-    ["Bélgica","be","+32"],["Belize","bz","+501"],["Benin","bj","+229"],["Bermudas","bm","+1441"],
-    ["Bielorrússia","by","+375"],["Bolívia","bo","+591"],["Bósnia e Herzegovina","ba","+387"],["Botsuana","bw","+267"],
-    ["Brasil","br","+55"],["Brunei","bn","+673"],["Bulgária","bg","+359"],["Burkina Faso","bf","+226"],
-    ["Burundi","bi","+257"],["Butão","bt","+975"],["Cabo Verde","cv","+238"],["Camarões","cm","+237"],
-    ["Camboja","kh","+855"],["Canadá","ca","+1"],["Catar","qa","+974"],["Cazaquistão","kz","+7"],
-    ["Chade","td","+235"],["Chile","cl","+56"],["China","cn","+86"],["Chipre","cy","+357"],
-    ["Cingapura","sg","+65"],["Colômbia","co","+57"],["Comores","km","+269"],["Congo","cg","+242"],
-    ["Congo (RDC)","cd","+243"],["Coreia do Norte","kp","+850"],["Coreia do Sul","kr","+82"],["Costa do Marfim","ci","+225"],
-    ["Costa Rica","cr","+506"],["Croácia","hr","+385"],["Cuba","cu","+53"],["Dinamarca","dk","+45"],
-    ["Djibuti","dj","+253"],["Dominica","dm","+1767"],["Egito","eg","+20"],["El Salvador","sv","+503"],
-    ["Emirados Árabes Unidos","ae","+971"],["Equador","ec","+593"],["Eritreia","er","+291"],["Eslováquia","sk","+421"],
-    ["Eslovênia","si","+386"],["Espanha","es","+34"],["Estados Unidos","us","+1"],["Estônia","ee","+372"],
-    ["Eswatini","sz","+268"],["Etiópia","et","+251"],["Fiji","fj","+679"],["Filipinas","ph","+63"],
-    ["Finlândia","fi","+358"],["França","fr","+33"],["Gabão","ga","+241"],["Gâmbia","gm","+220"],
-    ["Gana","gh","+233"],["Geórgia","ge","+995"],["Gibraltar","gi","+350"],["Granada","gd","+1473"],
-    ["Grécia","gr","+30"],["Groenlândia","gl","+299"],["Guadalupe","gp","+590"],["Guam","gu","+1671"],
-    ["Guatemala","gt","+502"],["Guiana","gy","+592"],["Guiné","gn","+224"],["Guiné-Bissau","gw","+245"],
-    ["Guiné Equatorial","gq","+240"],["Haiti","ht","+509"],["Holanda","nl","+31"],["Honduras","hn","+504"],
-    ["Hong Kong","hk","+852"],["Hungria","hu","+36"],["Iêmen","ye","+967"],["Ilhas Cayman","ky","+1345"],
-    ["Ilhas Cook","ck","+682"],["Ilhas Faroé","fo","+298"],["Ilhas Marshall","mh","+692"],["Ilhas Salomão","sb","+677"],
-    ["Ilhas Virgens Britânicas","vg","+1284"],["Índia","in","+91"],["Indonésia","id","+62"],["Irã","ir","+98"],
-    ["Iraque","iq","+964"],["Irlanda","ie","+353"],["Islândia","is","+354"],["Israel","il","+972"],
-    ["Itália","it","+39"],["Jamaica","jm","+1876"],["Japão","jp","+81"],["Jordânia","jo","+962"],
-    ["Kosovo","xk","+383"],["Kuwait","kw","+965"],["Laos","la","+856"],["Lesoto","ls","+266"],
-    ["Letônia","lv","+371"],["Líbano","lb","+961"],["Libéria","lr","+231"],["Líbia","ly","+218"],
-    ["Liechtenstein","li","+423"],["Lituânia","lt","+370"],["Luxemburgo","lu","+352"],["Macau","mo","+853"],
-    ["Macedônia do Norte","mk","+389"],["Madagascar","mg","+261"],["Malásia","my","+60"],["Malawi","mw","+265"],
-    ["Maldivas","mv","+960"],["Mali","ml","+223"],["Malta","mt","+356"],["Marrocos","ma","+212"],
-    ["Martinica","mq","+596"],["Maurício","mu","+230"],["Mauritânia","mr","+222"],["México","mx","+52"],
-    ["Mianmar","mm","+95"],["Micronésia","fm","+691"],["Moçambique","mz","+258"],["Moldávia","md","+373"],
-    ["Mônaco","mc","+377"],["Mongólia","mn","+976"],["Montenegro","me","+382"],["Namíbia","na","+264"],
-    ["Nauru","nr","+674"],["Nepal","np","+977"],["Nicarágua","ni","+505"],["Níger","ne","+227"],
-    ["Nigéria","ng","+234"],["Noruega","no","+47"],["Nova Caledônia","nc","+687"],["Nova Zelândia","nz","+64"],
-    ["Omã","om","+968"],["Palau","pw","+680"],["Palestina","ps","+970"],["Panamá","pa","+507"],
-    ["Papua-Nova Guiné","pg","+675"],["Paquistão","pk","+92"],["Paraguai","py","+595"],["Peru","pe","+51"],
-    ["Polinésia Francesa","pf","+689"],["Polônia","pl","+48"],["Porto Rico","pr","+1787"],["Portugal","pt","+351"],
-    ["Quênia","ke","+254"],["Quirguistão","kg","+996"],["Reino Unido","gb","+44"],["Rep. Centro-Africana","cf","+236"],
-    ["República Dominicana","do","+1809"],["República Tcheca","cz","+420"],["Reunião","re","+262"],["Romênia","ro","+40"],
-    ["Ruanda","rw","+250"],["Rússia","ru","+7"],["Saara Ocidental","eh","+212"],["Samoa","ws","+685"],
-    ["San Marino","sm","+378"],["Santa Lúcia","lc","+1758"],["São Cristóvão e Nevis","kn","+1869"],["São Tomé e Príncipe","st","+239"],
-    ["São Vicente e Granadinas","vc","+1784"],["Seicheles","sc","+248"],["Senegal","sn","+221"],["Serra Leoa","sl","+232"],
-    ["Sérvia","rs","+381"],["Síria","sy","+963"],["Somália","so","+252"],["Sri Lanka","lk","+94"],
-    ["Sudão","sd","+249"],["Sudão do Sul","ss","+211"],["Suécia","se","+46"],["Suíça","ch","+41"],
-    ["Suriname","sr","+597"],["Tailândia","th","+66"],["Taiwan","tw","+886"],["Tajiquistão","tj","+992"],
-    ["Tanzânia","tz","+255"],["Timor-Leste","tl","+670"],["Togo","tg","+228"],["Tonga","to","+676"],
-    ["Trinidad e Tobago","tt","+1868"],["Tunísia","tn","+216"],["Turcomenistão","tm","+993"],["Turquia","tr","+90"],
-    ["Tuvalu","tv","+688"],["Ucrânia","ua","+380"],["Uganda","ug","+256"],["Uruguai","uy","+598"],
-    ["Uzbequistão","uz","+998"],["Vanuatu","vu","+678"],["Vaticano","va","+379"],["Venezuela","ve","+58"],
-    ["Vietnã","vn","+84"],["Zâmbia","zm","+260"],["Zimbábue","zw","+263"]
-  ].sort((a,b)=>a[0].localeCompare(b[0],'pt'));
+document.getElementById('startBtn').onclick=()=>{ track('quiz_start'); next(); };
+document.getElementById('resCta').onclick=next;
+document.getElementById('videoCta').onclick=()=>{ track('offer_cta_click'); next(); };
+document.getElementById('checkout').addEventListener('click',()=>track('checkout_click'));
 
-  const ddiBtn=document.getElementById('ddiBtn');
-  const ddiPanel=document.getElementById('ddiPanel');
-  const ddiList=document.getElementById('ddiList');
-  const ddiSearch=document.getElementById('ddiSearch');
-  const ddiFlag=document.getElementById('ddiFlag');
-  const ddiCode=document.getElementById('ddiCode');
-  const flagUrl=c=>'https://flagcdn.com/'+c+'.svg';
-
-  function renderPaises(filtro=''){
-    const q=filtro.trim().toLowerCase();
-    ddiList.innerHTML='';
-    PAISES.filter(p=>!q||p[0].toLowerCase().includes(q)||p[2].includes(q)).forEach(p=>{
-      const b=document.createElement('button');
-      b.type='button'; b.className='ddi-item';
-      b.innerHTML='<img class="flag" src="'+flagUrl(p[1])+'" alt="" loading="lazy"><span class="nm">'+p[0]+'</span><span class="dc">'+p[2]+'</span>';
-      b.onclick=()=>{ ddiFlag.src=flagUrl(p[1]); ddiCode.textContent=p[2]; fecharDDI(); document.getElementById('leadTel').focus(); };
-      ddiList.appendChild(b);
-    });
-  }
-  function abrirDDI(){ renderPaises(); ddiPanel.hidden=false; ddiSearch.value=''; setTimeout(()=>ddiSearch.focus(),0); }
-  function fecharDDI(){ ddiPanel.hidden=true; }
-  ddiBtn.onclick=e=>{ e.stopPropagation(); ddiPanel.hidden?abrirDDI():fecharDDI(); };
-  ddiSearch.oninput=()=>renderPaises(ddiSearch.value);
-  ddiSearch.onclick=e=>e.stopPropagation();
-  document.addEventListener('click',e=>{ if(!ddiPanel.hidden && !ddiPanel.contains(e.target) && !ddiBtn.contains(e.target)) fecharDDI(); });
-
-  const leadForm=document.getElementById('leadForm');
-  leadForm.addEventListener('submit',(e)=>{
-    e.preventDefault();
-    if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); // fecha teclado / reseta zoom iOS
-    const dados={
-      nome:document.getElementById('leadNome').value.trim(),
-      email:document.getElementById('leadEmail').value.trim(),
-      telefone:ddiCode.textContent+' '+document.getElementById('leadTel').value.trim(),
-      respostas:coletaRespostas()
-    };
-    salvaLead(dados);   // segundo plano, não bloqueia
-    next();             // avança na hora
+/* ===================== "O QUE RECEBE" ===================== */
+document.querySelectorAll('[data-access]').forEach(grid=>{
+  ACCESS.forEach(([t,d],k)=>{
+    const n=k+1, card=document.createElement('div'); card.className='access-card';
+    card.innerHTML='<div class="access-img"><img src="colecao-'+n+'.png" alt="'+t+'" onerror="this.style.display=\'none\';this.parentNode.classList.add(\'ph\');this.parentNode.dataset.n=\''+n+'\'"></div><h4>'+t+'</h4><p>'+d+'</p>';
+    grid.appendChild(card);
   });
+});
 
-  render();
+/* ===================== DDI + LEAD ===================== */
+const PAISES=[
+  ["Afeganistão","af","+93"],["África do Sul","za","+27"],["Albânia","al","+355"],["Alemanha","de","+49"],["Andorra","ad","+376"],["Angola","ao","+244"],["Antígua e Barbuda","ag","+1268"],["Arábia Saudita","sa","+966"],["Argélia","dz","+213"],["Argentina","ar","+54"],["Armênia","am","+374"],["Aruba","aw","+297"],["Austrália","au","+61"],["Áustria","at","+43"],["Azerbaijão","az","+994"],["Bahamas","bs","+1242"],["Bahrein","bh","+973"],["Bangladesh","bd","+880"],["Barbados","bb","+1246"],["Bélgica","be","+32"],["Belize","bz","+501"],["Benin","bj","+229"],["Bielorrússia","by","+375"],["Bolívia","bo","+591"],["Bósnia e Herzegovina","ba","+387"],["Botsuana","bw","+267"],["Brasil","br","+55"],["Brunei","bn","+673"],["Bulgária","bg","+359"],["Burkina Faso","bf","+226"],["Burundi","bi","+257"],["Butão","bt","+975"],["Cabo Verde","cv","+238"],["Camarões","cm","+237"],["Camboja","kh","+855"],["Canadá","ca","+1"],["Catar","qa","+974"],["Cazaquistão","kz","+7"],["Chade","td","+235"],["Chile","cl","+56"],["China","cn","+86"],["Chipre","cy","+357"],["Cingapura","sg","+65"],["Colômbia","co","+57"],["Comores","km","+269"],["Congo","cg","+242"],["Congo (RDC)","cd","+243"],["Coreia do Norte","kp","+850"],["Coreia do Sul","kr","+82"],["Costa do Marfim","ci","+225"],["Costa Rica","cr","+506"],["Croácia","hr","+385"],["Cuba","cu","+53"],["Dinamarca","dk","+45"],["Djibuti","dj","+253"],["Dominica","dm","+1767"],["Egito","eg","+20"],["El Salvador","sv","+503"],["Emirados Árabes Unidos","ae","+971"],["Equador","ec","+593"],["Eritreia","er","+291"],["Eslováquia","sk","+421"],["Eslovênia","si","+386"],["Espanha","es","+34"],["Estados Unidos","us","+1"],["Estônia","ee","+372"],["Eswatini","sz","+268"],["Etiópia","et","+251"],["Fiji","fj","+679"],["Filipinas","ph","+63"],["Finlândia","fi","+358"],["França","fr","+33"],["Gabão","ga","+241"],["Gâmbia","gm","+220"],["Gana","gh","+233"],["Geórgia","ge","+995"],["Granada","gd","+1473"],["Grécia","gr","+30"],["Guatemala","gt","+502"],["Guiana","gy","+592"],["Guiné","gn","+224"],["Guiné-Bissau","gw","+245"],["Guiné Equatorial","gq","+240"],["Haiti","ht","+509"],["Holanda","nl","+31"],["Honduras","hn","+504"],["Hungria","hu","+36"],["Iêmen","ye","+967"],["Índia","in","+91"],["Indonésia","id","+62"],["Irã","ir","+98"],["Iraque","iq","+964"],["Irlanda","ie","+353"],["Islândia","is","+354"],["Israel","il","+972"],["Itália","it","+39"],["Jamaica","jm","+1876"],["Japão","jp","+81"],["Jordânia","jo","+962"],["Kuwait","kw","+965"],["Laos","la","+856"],["Lesoto","ls","+266"],["Letônia","lv","+371"],["Líbano","lb","+961"],["Libéria","lr","+231"],["Líbia","ly","+218"],["Liechtenstein","li","+423"],["Lituânia","lt","+370"],["Luxemburgo","lu","+352"],["Macedônia do Norte","mk","+389"],["Madagascar","mg","+261"],["Malásia","my","+60"],["Malawi","mw","+265"],["Maldivas","mv","+960"],["Mali","ml","+223"],["Malta","mt","+356"],["Marrocos","ma","+212"],["Maurício","mu","+230"],["Mauritânia","mr","+222"],["México","mx","+52"],["Mianmar","mm","+95"],["Moçambique","mz","+258"],["Moldávia","md","+373"],["Mônaco","mc","+377"],["Mongólia","mn","+976"],["Montenegro","me","+382"],["Namíbia","na","+264"],["Nepal","np","+977"],["Nicarágua","ni","+505"],["Níger","ne","+227"],["Nigéria","ng","+234"],["Noruega","no","+47"],["Nova Zelândia","nz","+64"],["Omã","om","+968"],["Palestina","ps","+970"],["Panamá","pa","+507"],["Paquistão","pk","+92"],["Paraguai","py","+595"],["Peru","pe","+51"],["Polônia","pl","+48"],["Portugal","pt","+351"],["Quênia","ke","+254"],["Quirguistão","kg","+996"],["Reino Unido","gb","+44"],["República Dominicana","do","+1809"],["República Tcheca","cz","+420"],["Romênia","ro","+40"],["Ruanda","rw","+250"],["Rússia","ru","+7"],["Samoa","ws","+685"],["San Marino","sm","+378"],["Santa Lúcia","lc","+1758"],["São Tomé e Príncipe","st","+239"],["Senegal","sn","+221"],["Serra Leoa","sl","+232"],["Sérvia","rs","+381"],["Síria","sy","+963"],["Somália","so","+252"],["Sri Lanka","lk","+94"],["Sudão","sd","+249"],["Suécia","se","+46"],["Suíça","ch","+41"],["Suriname","sr","+597"],["Tailândia","th","+66"],["Taiwan","tw","+886"],["Tajiquistão","tj","+992"],["Tanzânia","tz","+255"],["Timor-Leste","tl","+670"],["Togo","tg","+228"],["Trinidad e Tobago","tt","+1868"],["Tunísia","tn","+216"],["Turcomenistão","tm","+993"],["Turquia","tr","+90"],["Ucrânia","ua","+380"],["Uganda","ug","+256"],["Uruguai","uy","+598"],["Uzbequistão","uz","+998"],["Vanuatu","vu","+678"],["Vaticano","va","+379"],["Venezuela","ve","+58"],["Vietnã","vn","+84"],["Zâmbia","zm","+260"],["Zimbábue","zw","+263"]
+].sort((a,b)=>a[0].localeCompare(b[0],'pt'));
+const ddiBtn=document.getElementById('ddiBtn'),ddiPanel=document.getElementById('ddiPanel'),ddiList=document.getElementById('ddiList'),ddiSearch=document.getElementById('ddiSearch'),ddiFlag=document.getElementById('ddiFlag'),ddiCode=document.getElementById('ddiCode');
+const flagUrl=c=>'https://flagcdn.com/'+c+'.svg';
+function renderPaises(f=''){ const q=f.trim().toLowerCase(); ddiList.innerHTML='';
+  PAISES.filter(p=>!q||p[0].toLowerCase().includes(q)||p[2].includes(q)).forEach(p=>{
+    const b=document.createElement('button'); b.type='button'; b.className='ddi-item';
+    b.innerHTML='<img class="flag" src="'+flagUrl(p[1])+'" alt="" loading="lazy"><span class="nm">'+p[0]+'</span><span class="dc">'+p[2]+'</span>';
+    b.onclick=()=>{ ddiFlag.src=flagUrl(p[1]); ddiCode.textContent=p[2]; ddiPanel.hidden=true; document.getElementById('leadTel').focus(); };
+    ddiList.appendChild(b);
+  });
+}
+ddiBtn.onclick=e=>{ e.stopPropagation(); if(ddiPanel.hidden){renderPaises();ddiPanel.hidden=false;ddiSearch.value='';setTimeout(()=>ddiSearch.focus(),0);} else ddiPanel.hidden=true; };
+ddiSearch.oninput=()=>renderPaises(ddiSearch.value);
+ddiSearch.onclick=e=>e.stopPropagation();
+document.addEventListener('click',e=>{ if(!ddiPanel.hidden && !ddiPanel.contains(e.target) && !ddiBtn.contains(e.target)) ddiPanel.hidden=true; });
+
+function salvaLead(dados){
+  try{
+    const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),6000);
+    fetch(SUPA_URL+'/rest/v1/leads',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON,'Prefer':'return=minimal'},body:JSON.stringify(dados),signal:ctrl.signal,keepalive:true}).then(()=>clearTimeout(t)).catch(err=>console.warn('lead:',err));
+  }catch(err){ console.warn('lead:',err); }
+}
+document.getElementById('leadForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  const score=calcScore(), perfil=perfilDe(score);
+  salvaLead({
+    nome:document.getElementById('leadNome').value.trim(),
+    email:document.getElementById('leadEmail').value.trim(),
+    telefone:ddiCode.textContent+' '+document.getElementById('leadTel').value.trim(),
+    beauty_score:score, perfil:perfil.nome, respostas:respostasArr()
+  });
+  track('lead_capturado',{beauty_score:score, perfil:perfil.nome});
+  next();
+});
+
+/* ===================== INÍCIO ===================== */
+track('quiz_view');
+render();
 </script>
 </body>
 </html>
