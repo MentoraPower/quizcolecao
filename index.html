@@ -425,7 +425,6 @@
       <div class="vsl-box">
         <vturb-smartplayer id="vid-6a4fe712b64d075550452eaa" style="display:block;margin:0 auto;width:100%;"><div class="vturb-player-placeholder" style="position:relative;width:100%;padding:56.25% 0 0;z-index:0;background-color:black;"></div></vturb-smartplayer>
       </div>
-      <script type="text/javascript">var s=document.createElement("script");s.src="https://scripts.converteai.net/2fe3fa7a-4b6e-44f7-be18-0c3cce42c4c0/players/6a4fe712b64d075550452eaa/v4/player.js",s.async=!0,document.head.appendChild(s);</script>
       <div class="btn-row" style="max-width:520px;margin-left:auto;margin-right:auto">
         <button class="btn full" id="videoCta">Quero conhecer a Coleção Beauty</button>
       </div>
@@ -782,7 +781,16 @@ function render(){
   if(el.getAttribute('data-loading')==='parcial') runParcial(el);
   if(el.getAttribute('data-loading')==='final') runFinal(el);
   if(el.hasAttribute('data-result')) preencheResultado();
+  if(el.hasAttribute('data-video')) loadVSL();
   window.scrollTo({top:0,behavior:'smooth'});
+}
+// Carrega o player da VSL SÓ quando o usuário chega na tela do vídeo (não antes).
+let vslLoaded=false;
+function loadVSL(){
+  if(vslLoaded) return; vslLoaded=true;
+  const s=document.createElement('script');
+  s.src='https://scripts.converteai.net/2fe3fa7a-4b6e-44f7-be18-0c3cce42c4c0/players/6a4fe712b64d075550452eaa/v4/player.js';
+  s.async=true; document.head.appendChild(s);
 }
 function go(n){ if(n>=0 && n<steps.length){ i=n; render(); } }
 function next(){
