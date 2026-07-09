@@ -781,7 +781,7 @@ function render(){
   if(el.getAttribute('data-loading')==='parcial') runParcial(el);
   if(el.getAttribute('data-loading')==='final') runFinal(el);
   if(el.hasAttribute('data-result')) preencheResultado();
-  if(el.hasAttribute('data-video')) loadVSL();
+  if(el.hasAttribute('data-video')) loadVSL(); else stopVSL();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 // Carrega o player da VSL SÓ quando o usuário chega na tela do vídeo (não antes).
@@ -791,6 +791,11 @@ function loadVSL(){
   const s=document.createElement('script');
   s.src='https://scripts.converteai.net/2fe3fa7a-4b6e-44f7-be18-0c3cce42c4c0/players/6a4fe712b64d075550452eaa/v4/player.js';
   s.async=true; document.head.appendChild(s);
+}
+// Pausa o vídeo ao sair da tela dele.
+function stopVSL(){
+  try{ document.querySelectorAll('#vid-6a4fe712b64d075550452eaa video, #vid-6a4fe712b64d075550452eaa audio').forEach(m=>{ try{ m.pause(); }catch(e){} });
+       document.querySelectorAll('video,audio').forEach(m=>{ try{ if(!m.paused) m.pause(); }catch(e){} }); }catch(e){}
 }
 function go(n){ if(n>=0 && n<steps.length){ i=n; render(); } }
 function next(){
